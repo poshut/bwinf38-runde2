@@ -92,7 +92,7 @@ def add_to_table(term, table):
     table[val] = (term, digits)
 
 
-def generate(digit, num_digits, aggregated_table, split_table):
+def generate(digit, num_digits, aggregated_table, split_table, debug=False):
 
     current_split_table = split_table[num_digits]        
 
@@ -129,7 +129,8 @@ def generate(digit, num_digits, aggregated_table, split_table):
                     op1_k, op2_k = op2_k, op1_k
                     op1_v, op2_v = op2_v, op1_v
                     swap = False
-    print("generated split table with digits:", num_digits)
+    if debug:
+        print("generated split table with digits:", num_digits)
 
     for k in split_table[num_digits]:
         if k not in aggregated_table:
