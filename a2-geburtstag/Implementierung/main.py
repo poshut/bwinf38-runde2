@@ -130,7 +130,7 @@ def generate(digit, num_digits, aggregated_table, split_table, debug=False):
                     op1_v, op2_v = op2_v, op1_v
                     swap = False
     if debug:
-        print("generated split table with digits:", num_digits)
+        print("generated split table with digits:", num_digits, file=sys.stderr)
 
     for k in split_table[num_digits]:
         if k not in aggregated_table:
