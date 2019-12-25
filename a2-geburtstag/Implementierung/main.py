@@ -84,10 +84,7 @@ class BinaryOperation(Term):
         return NotImplementedError()
         
 
-AGGREGATED_TABLE = {}
-TABLE_SPLIT = defaultdict(dict)
-
-def add_to_table(term, table=AGGREGATED_TABLE):
+def add_to_table(term, table):
     val = term.value()
     digits = term.number_of_digits()
     if val in table and table[val][1] < digits:
@@ -95,10 +92,9 @@ def add_to_table(term, table=AGGREGATED_TABLE):
     table[val] = (term, digits)
 
 
+def generate(digit, num_digits, aggregated_table, split_table):
 
-def generate(digit, num_digits):
-
-    current_split_table = TABLE_SPLIT[num_digits]        
+    current_split_table = split_table[num_digits]        
 
     # Add 3, 33, 333 etc
     num = int(str(digit)*num_digits)
@@ -107,10 +103,10 @@ def generate(digit, num_digits):
 
     for op1_num_digits in range(1, num_digits // 2 + 1):
         op2_num_digits = num_digits - op1_num_digits
-        for op1_k in TABLE_SPLIT[op1_num_digits]:
-            op1_v = TABLE_SPLIT[op1_num_digits][op1_k][0]
-            for op2_k in TABLE_SPLIT[op2_num_digits]:
-                op2_v = TABLE_SPLIT[op2_num_digits][op2_k][0]
+        for op1_k in split_table[op1_num_digits]:
+            op1_v = split_table[op1_num_digits][op1_k][0]
+            for op2_k in split_table[op2_num_digits]:
+                op2_v = split_table[op2_num_digits][op2_k][0]
                 # Make sure that op1_k > op2_k
                 if op1_k < op2_k:
                     op1_k, op2_k = op2_k, op1_k
@@ -133,39 +129,40 @@ def generate(digit, num_digits):
                     op1_k, op2_k = op2_k, op1_k
                     op1_v, op2_v = op2_v, op1_v
                     swap = False
-    print("generated", num_digits)
+    print("generated split table with digits:", num_digits)
 
-    for k in TABLE_SPLIT[num_digits]:
-        if k not in AGGREGATED_TABLE:
-            AGGREGATED_TABLE[k] = TABLE_SPLIT[num_digits][k]
+    for k in split_table[num_digits]:
+        if k not in aggregated_table:
+            aggregated_table[k] = split_table[num_digits][k]
+    return aggregated_table, split_table
 
-def scan(number, digit):
-
+def scan(number, digit, aggregated_table):
     results = set()
-    if number in AGGREGATED_TABLE:
-        results.add(AGGREGATED_TABLE[number][0])
+    if number in aggregated_table:
+        results.add(aggregated_table[number][0])
 
-    for j in AGGREGATED_TABLE:
-        if number - j in AGGREGATED_TABLE:
-            results.add(BinaryOperation(AGGREGATED_TABLE[j][0], AGGREGATED_TABLE[number-j][0], BinaryOperation.OP_ADD))
-        if number + j in AGGREGATED_TABLE:
-            results.add(BinaryOperation(AGGREGATED_TABLE[number+j][0], AGGREGATED_TABLE[j][0], BinaryOperation.OP_SUB))
-        if j - number in AGGREGATED_TABLE:
-            results.add(BinaryOperation(AGGREGATED_TABLE[j][0], AGGREGATED_TABLE[j-number][0], BinaryOperation.OP_SUB))
+    for j in aggregated_table:
+        if number - j in aggregated_table:
+            results.add(BinaryOperation(aggregated_table[j][0], aggregated_table[number-j][0], BinaryOperation.OP_ADD))
+        if number + j in aggregated_table:
+            results.add(BinaryOperation(aggregated_table[number+j][0], aggregated_table[j][0], BinaryOperation.OP_SUB))
+        if j - number in aggregated_table:
+            results.add(BinaryOperation(aggregated_table[j][0], aggregated_table[j-number][0], BinaryOperation.OP_SUB))
         
         if j != 0:
-            if (number*j) in AGGREGATED_TABLE:
-                results.add(BinaryOperation(AGGREGATED_TABLE[number*j][0], AGGREGATED_TABLE[j][0], BinaryOperation.OP_DIV))
+            if (number*j) in aggregated_table:
+                results.add(BinaryOperation(aggregated_table[number*j][0], aggregated_table[j][0], BinaryOperation.OP_DIV))
             
             res = j / number
             resint = int(res)
-            if res == resint and resint in AGGREGATED_TABLE:
-                results.add(BinaryOperation(AGGREGATED_TABLE[j][0], AGGREGATED_TABLE[resint][0], BinaryOperation.OP_DIV))
+            if res == resint and resint in aggregated_table:
+                results.add(BinaryOperation(aggregated_table[j][0], aggregated_table[resint][0], BinaryOperation.OP_DIV))
         
             res = number / j
             resint = int(res)
-            if res == resint and resint in AGGREGATED_TABLE:
-                results.add(BinaryOperation(AGGREGATED_TABLE[number/j][0], AGGREGATED_TABLE[j][0], BinaryOperation.OP_MULT))
+            if res == resint and resint in aggregated_table:
+                results.add(BinaryOperation(aggregated_table[number/j][0], aggregated_table[j][0], BinaryOperation.OP_MULT))
+
     if len(results) == 0:
         return None
     res = 0
@@ -178,9 +175,6 @@ def scan(number, digit):
     return res
 
 
-
-
-
 if __name__ == '__main__':
     assert len(sys.argv) >= 3
 
@@ -189,11 +183,15 @@ if __name__ == '__main__':
     digit = int(sys.argv[2])
     assert len(str(digit)) == 1 and digit > 0
 
+
+    aggregated_table = {}
+    split_table = defaultdict(dict)
+
     i = 1
     res_n = math.inf
     while i <= res_n - 2:
-        generate(digit, i)
-        res = scan(number, digit)
+        aggregated_table, split_table = generate(digit, i, aggregated_table, split_table)
+        res = scan(number, digit, aggregated_table)
         if res is not None:
             res_n = res.number_of_digits()
             print("found", res, "with", res.number_of_digits(), "digits, looking if shorter is possible")
