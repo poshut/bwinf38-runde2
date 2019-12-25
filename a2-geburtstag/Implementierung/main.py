@@ -176,19 +176,23 @@ def scan(number, digit, aggregated_table):
 
 
 if __name__ == '__main__':
-    assert len(sys.argv) >= 3
+    if len(sys.argv) < 3:
+        exit("Usage: " + sys.argv[0] + " <number> <digit>")
 
-    number = int(sys.argv[1])
-
-    digit = int(sys.argv[2])
-    assert len(str(digit)) == 1 and digit > 0
-
+    try:
+        number = int(sys.argv[1])
+        digit = int(sys.argv[2])
+        assert len(str(digit)) == 1 and digit > 0
+    except:
+        exit("Usage: " + sys.argv[0] + " <number> <digit>")
 
     aggregated_table = {}
     split_table = defaultdict(dict)
 
     i = 1
     res_n = math.inf
+
+    # Generate tables until shortest result will be available with scan()
     while i <= res_n - 2:
         aggregated_table, split_table = generate(digit, i, aggregated_table, split_table)
         res = scan(number, digit, aggregated_table)
