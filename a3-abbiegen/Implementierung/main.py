@@ -62,7 +62,6 @@ TARGET = 5
 # }
 
 FLOAT_ERROR_DIGITS = 8
-TURN_PRIO = 999999
 
 def straight(p1, junc, p2):
     delta1_x = junc[0] - p1[0]
@@ -136,7 +135,7 @@ def dijkstra(nodes, edges, sources, targets, number_turns=None):
             prio_new = prio + nodes[edge[0]]
             if not edge[1]:
                 if turns == number_turns:
-                    prio_new += TURN_PRIO
+                    continue
 
             pq.put((prio_new, edge[0], prev + [edge[0]], turns + (1 if not edge[1] else 0)))
 
