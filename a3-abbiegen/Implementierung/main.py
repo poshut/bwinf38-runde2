@@ -122,16 +122,16 @@ def dijkstra(nodes, edges, sources, targets, number_turns=None):
     for source in sources:
         pq.put((nodes[source], source, [source], 0))
 
-    discovered = set()
+    discovered = {}
     
     while True:
         if pq.empty():
             exit("queue empty! there seems to be no route to the target node!")
         prio, node, prev, turns = pq.get()
-        if node in discovered:
+        if node in discovered and turns >= discovered[node]:
             continue
 
-        discovered.add(node)
+        discovered[node] = turns
         for edge in edges[node]:
             prio_new = prio + nodes[edge[0]]
             if not edge[1]:
