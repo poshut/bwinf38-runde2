@@ -1,5 +1,6 @@
 import sys
 import math
+import argparse
 from collections import defaultdict
 from itertools import combinations_with_replacement
 from queue import Queue
@@ -234,18 +235,12 @@ def scan(number, digit, aggregated_table, extended):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        exit("Usage: " + sys.argv[0] + " <number> <digit>")
-
-    try:
-        number = int(sys.argv[1])
-        digit = int(sys.argv[2])
-        assert len(str(digit)) == 1 and digit > 0
-    except:
-        exit("Usage: " + sys.argv[0] + " <number> <digit>")
-
-    extended = True
-    debug = False
+    parser = argparse.ArgumentParser(description="Decompose a number into a term using one digit")
+    parser.add_argument("number", help="number to decompose", type=int)
+    parser.add_argument("digit", help="digit to decompose into", type=int)
+    parser.add_argument("--extended", "-e", help="allow the usage of power functions and factorials (extended mode)", action='store_true')
+    parser.add_argument("--verbose", "-v", help="enable verbose output", action='store_true')
+    args = parser.parse_args()
 
     aggregated_table = {}
     split_table = defaultdict(dict)
@@ -255,8 +250,8 @@ if __name__ == '__main__':
 
     # Generate tables until shortest result will be available with scan()
     while i <= res_n - 2:
-        aggregated_table, split_table = generate(digit, i, aggregated_table, split_table, extended, debug=debug)
-        res = scan(number, digit, aggregated_table, extended)
+        aggregated_table, split_table = generate(args.digit, i, aggregated_table, split_table, args.extended, debug=args.verbose)
+        res = scan(args.number, args.digit, aggregated_table, args.verbose)
         if res is not None:
             res_n = res.number_of_digits()
             print("found", res, "with", res.number_of_digits(), "digits, looking if shorter is possible")
