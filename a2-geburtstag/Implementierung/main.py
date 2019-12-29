@@ -4,6 +4,17 @@ from collections import defaultdict
 from itertools import combinations_with_replacement
 from queue import Queue
 
+MAX_DIGITS = 100
+FACTORIALS = {}
+
+_i = 3
+_fac = math.factorial(_i)
+while len(str(_fac)) <= MAX_DIGITS:
+    FACTORIALS[_fac] = _i
+    _i += 1
+    _fac = math.factorial(_i)
+MAX_FACTORIAL = _i -1
+
 class Term(object):
 
     def __init__(self):
@@ -36,13 +47,35 @@ class Number(Term):
     def __str__(self):
         return str(self.val)
 
+class UnaryOperation(Term):
+    OP_FAC = 0
+    OPERATIONS = [OP_FAC]
+
+    def __init__(self, val, op):
+        assert op in self.__class__.OPERATIONS
+        self.val = val
+        self.op = op
+    
+    def value(self):
+        if self.op == UnaryOperation.OP_FAC:
+            return math.factorial(self.val.value())
+        return NotImplementedError()
+    
+    def number_of_digits(self):
+        return self.val.number_of_digits()
+    
+    def __str__(self):
+        return '({}!)'.format(self.val)
+
+
 class BinaryOperation(Term):
 
     OP_ADD = 0
     OP_SUB = 1
     OP_MULT = 2
     OP_DIV = 3
-    OPERATIONS = [OP_ADD, OP_SUB, OP_MULT, OP_DIV]
+    OP_POW = 4
+    OPERATIONS = [OP_ADD, OP_SUB, OP_MULT, OP_DIV, OP_POW]
 
     def __init__(self, val1, val2, op):
         assert op in self.__class__.OPERATIONS
@@ -64,6 +97,8 @@ class BinaryOperation(Term):
             resint = int(res)
             assert res == resint
             return resint
+        elif self.op == BinaryOperation.OP_POW:
+            return self.val1.value() ** self.val2.value()
         return NotImplementedError()
 
     def number_of_digits(self):
@@ -81,24 +116,28 @@ class BinaryOperation(Term):
             return '*'
         elif self.op == BinaryOperation.OP_DIV:
             return '/'
+        elif self.op == BinaryOperation.OP_POW:
+            return '^'
         return NotImplementedError()
         
 
-def add_to_table(term, table):
+def add_to_table(term, table, extended=False):
     val = term.value()
+    if extended and val >= 3 and val <= MAX_FACTORIAL:
+        add_to_table(UnaryOperation(term, UnaryOperation.OP_FAC), table, extended=extended)
     digits = term.number_of_digits()
     if val in table and table[val][1] < digits:
         return
     table[val] = (term, digits)
 
 
-def generate(digit, num_digits, aggregated_table, split_table, debug=False):
+def generate(digit, num_digits, aggregated_table, split_table, extended, debug=False):
 
     current_split_table = split_table[num_digits]        
 
     # Add 3, 33, 333 etc
     num = int(str(digit)*num_digits)
-    current_split_table[num] = (Number(num), num_digits)
+    add_to_table(Number(num), current_split_table, extended)
     swap = False
 
     for op1_num_digits in range(1, num_digits // 2 + 1):
@@ -114,16 +153,21 @@ def generate(digit, num_digits, aggregated_table, split_table, debug=False):
                     swap = True
 
 
-                add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_ADD), current_split_table)
-                add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_SUB), current_split_table)
-                add_to_table(BinaryOperation(op2_v, op1_v, BinaryOperation.OP_SUB), current_split_table)
-                add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_MULT), current_split_table)
+                add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_ADD), current_split_table, extended)
+                add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_SUB), current_split_table, extended)
+                add_to_table(BinaryOperation(op2_v, op1_v, BinaryOperation.OP_SUB), current_split_table, extended)
+                add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_MULT), current_split_table, extended)
+                if extended and op1_k >= 2 and op2_k >= 2:
+                    if op2_k * math.log(op1_k, 10) <= MAX_DIGITS:
+                        add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_POW), current_split_table, extended)
+                    if op1_k * math.log(op2_k, 10) <= MAX_DIGITS:
+                        add_to_table(BinaryOperation(op2_v, op1_v, BinaryOperation.OP_POW), current_split_table, extended)
 
                 if op2_k != 0:
                     res = op1_k / op2_k
                     resint = int(res)
                     if res == resint:
-                        add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_DIV), current_split_table)
+                        add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_DIV), current_split_table, extended)
 
                 if swap:
                     op1_k, op2_k = op2_k, op1_k
@@ -137,7 +181,7 @@ def generate(digit, num_digits, aggregated_table, split_table, debug=False):
             aggregated_table[k] = split_table[num_digits][k]
     return aggregated_table, split_table
 
-def scan(number, digit, aggregated_table):
+def scan(number, digit, aggregated_table, extended):
     results = set()
     if number in aggregated_table:
         results.add(aggregated_table[number][0])
@@ -163,6 +207,19 @@ def scan(number, digit, aggregated_table):
             resint = int(res)
             if res == resint and resint in aggregated_table:
                 results.add(BinaryOperation(aggregated_table[number/j][0], aggregated_table[j][0], BinaryOperation.OP_MULT))
+        
+        if extended and number > 1 and j > 1:
+            res = number ** (1/j)
+            if res in aggregated_table and res != 1.0:
+                results.add(BinaryOperation(aggregated_table[res][0], aggregated_table[j][0], BinaryOperation.OP_POW))
+            res = math.log(number, j)
+            if res in aggregated_table:
+                results.add(BinaryOperation(aggregated_table[j][0], aggregated_table[res][0], BinaryOperation.OP_POW))
+        
+
+    if extended and j >= 3 and j <= 60 and j in FACTORIALS:
+        results.add(UnaryOperation(aggregated_table[FACTORIALS[j]][0], UnaryOperation.OP_FAC))
+        
 
     if len(results) == 0:
         return None
@@ -187,6 +244,9 @@ if __name__ == '__main__':
     except:
         exit("Usage: " + sys.argv[0] + " <number> <digit>")
 
+    extended = True
+    debug = False
+
     aggregated_table = {}
     split_table = defaultdict(dict)
 
@@ -195,8 +255,8 @@ if __name__ == '__main__':
 
     # Generate tables until shortest result will be available with scan()
     while i <= res_n - 2:
-        aggregated_table, split_table = generate(digit, i, aggregated_table, split_table)
-        res = scan(number, digit, aggregated_table)
+        aggregated_table, split_table = generate(digit, i, aggregated_table, split_table, extended, debug=debug)
+        res = scan(number, digit, aggregated_table, extended)
         if res is not None:
             res_n = res.number_of_digits()
             print("found", res, "with", res.number_of_digits(), "digits, looking if shorter is possible")
