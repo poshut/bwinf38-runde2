@@ -86,6 +86,126 @@
 \tableofcontents
 
 \section{Lösungsidee}
+Für die Beantwortung von Bilals Frage muss das Straßennetz zunächst als Datenstruktur repräsentiert werden.
+Daraufhin arbeite ich mit einer modifizierten Version des Dijkstra-Shortest-Path-Algorithmus, um einen Weg zu finden, dessen Länge innerhalb der gegebenen Grenzen liegt und auf dem so wenig wie möglich abgebogen werden muss.
+
+\subsection{Darstellung des Straßennetzes}
+\label{sec:idea:representation}
+\todo{Zwei Abbildungen einfügen}
+\todo{pseudocode}
+Straßennetze werden allgemein als gewichtete Graphen, d.h. Mengen von Knoten und Kanten zwischen diesen, repräsentiert.
+Normalerweise entsprechen dabei Knoten den Kreuzungen und Kanten den Straßen zwischen den Kreuzungen, ein sog. \textit{node-based-graph}.
+Dabei hat jede Kante ein Gewicht, d.h. einen ihr zugewiesenen numerischen Wert, der meistens der Länge der entsprechenden Straße entspricht.
+
+\todo{weights for the edges}
+\begin{figure}
+\centering
+\begin{tikzpicture}
+    [auto=left,every node/.style={circle,fill=blue!20}]
+    \node (0) at (0,0) {0};
+    \node (1) at (1,0)  {1};
+    \node (2) at (2,0) {2};
+    \node (3) at (3,0) {3};
+    \node [style={fill=green!60}] (4) at (4,0) {4};
+    \node (5) at (0,-1) {5};
+    \node (6) at (2,-1) {6};
+    \node (7) at (0,-2) {7};
+    \node (8) at (1,-2) {8};
+    \node [style={fill=red!60}] (9) at (0,-3) {9}; 
+    \draw (0) -- (1);
+    \draw (1) -- (2);
+    \draw (2) -- (3);
+    \draw (3) -- (4);
+    \draw (5) -- (0);
+    \draw (5) -- (7);
+    \draw (5) -- (1);
+    \draw (7) -- (9);
+    \draw (7) -- (8);
+    \draw (8) -- (6);
+    \draw (6) -- (1);
+    \draw (6) -- (2);
+    \draw (6) -- (3);
+\end{tikzpicture}
+\label{fig:graph-idee}
+\caption{Beispiel aus der Aufgabe, als \textit{node-based-graph} repräsentiert. \newline Knoten 9 ist dabei der Ausgangsknoten und Knoten 4 der Zielknoten}
+\end{figure}
+
+
+Wenn jedoch auch das Abbiegen miteinbezogen werden soll, wird die Darstellung des Straßennetzes schwieriger.
+Oft soll beispielsweise auf einer Route weniger abgebogen werden, weshalb Abbiegevorgängen Gewichte zugeordnet werden, sogenannte \textit{turn costs} \cite{geisberger}.
+Bei diesen Gewichten stößt die traditionelle Repräsentation der Straßennetze an ihre Grenzen, sodass bei \textit{turn costs} der Ansatz eines \textit{edge-based-graph}s gewählt wird.
+Dabei wird jede Straße als Knoten repräsentiert.
+Für jede Möglichkeit, von einer Straße auf eine andere zu gelangen, wird eine Kante zwischen den zwei entsprechenden Knoten hinzugefügt.
+Falls zwischen den Straßen abgebogen werden muss, kann dies entweder als Gewicht der Kante dargestellt werden oder ein einfaches \textsc{Wahr} oder \textsc{Falsch} für jede Kante gespeichert werden.
+Die Länge jeder Straße muss für einen \textit{edge-based-graph} für jeden Knoten statt für jede Kante gespeichert werden.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+    [auto=left,every node/.style={circle,fill=blue!20}]
+    \node [style={fill=green!60}] (3-4) at (0,0) {3-4};
+    \node (2-3) [left=of 3-4] {2-3};
+    \node (1-2) [left=of 2-3] {1-2};
+    \node (0-1) [left=of 1-2] {0-1};
+    \node (2-6) [below=of 2-3] {2-6};
+    \node (1-6) [below=of 2-6] {1-6};
+    \node (1-5) [left=of 1-6] {1-5};
+    \node (0-5) [left=of 1-5] {0-5};
+    \node (3-6) [right=of 2-6] {3-6};
+    \node (5-7) [below=of 1-5] {5-7};
+    \node (7-8) [below=of 1-6] {7-8};
+    \node (6-8) [right=of 1-6] {6-8};
+    \node [style={fill=red!60}] (7-9) [below=of 5-7] {7-9};
+    \draw (0-1) -- (1-2); % yes
+    \draw (0-1) -- (1-6); % no
+    \draw (0-1) -- (1-5); % no
+    \draw (0-1) -- (0-5); % no
+    \draw (0-5) -- (5-7); % yes
+    \draw (0-5) -- (1-5); % no
+    \draw (1-2) -- (1-6); % no
+    \draw (1-2) -- (1-5); % no
+    \draw (1-2) -- (2-6); % no
+    \draw (1-2) -- (2-3); % yes
+    \draw (1-5) -- (5-7); % no
+    \draw (1-5) -- (1-6); % no
+    \draw (1-6) -- (2-6); % no
+    \draw (1-6) -- (3-6); % no
+    \draw (1-6) -- (6-8); % no
+    \draw (2-3) -- (2-6); % no
+    \draw (2-3) -- (3-4); % yes
+    \draw (2-3) -- (3-6); % no
+    \draw (2-6) -- (3-6); % no
+    \draw (2-6) -- (6-8); % no
+    \draw (3-6) -- (6-8); % no
+    \draw (5-7) -- (7-8); % no
+    \draw (5-7) -- (7-9); % yes
+    \draw (6-8) -- (7-8); % no
+    \draw (7-8) -- (7-9); % no
+
+\end{tikzpicture}
+\caption{Beispiel aus der Aufgabe, als \textit{edge-based-graph} repräsentiert, hier ohne Gewicht}
+\end{figure}
+
+\subsection{Finden des optimalen Weges}
+Das Finden des optimalen Weges löse ich mithilfe des Dijkstra-Shortest-Path-Algorithmus.
+Dieser benutzt eine \textsc{PriorityQueue}, um Kreuzungen geordnet nach ihrer Distanz zum Ausgangspunkt zu \enquote{besuchen}.
+Wird eine Kreuzung "besucht", werden alle Kreuzungen, die von dieser Kreuzung über eine Straße erreicht werden können, der \textsc{PriorityQueue} mit ihrer Distanz vom Ursprung hinzugefügt.
+Wird die Zielkreuzung gefunden, terminiert der Algorithmus und der kürzeste Weg kann rekonstruiert werden.
+
+Der erste Schritt meines Programms ist es, den Dijkstra-Shortest-Path-Algorithmus auf den in Abschnitt \ref{sec:idea:representation} beschriebenen \textit{edge-based-graph} anzuwenden.
+Dadurch wird die kürzeste Distanz vom Start zum Ziel ermittelt.
+Zusätzlich kann jeweils die Anzahl an Abbiegevorgängen neben der Distanz in die \textsc{PriorityQueue} hinzugefügt werden, damit auch die maximale Anzahl an Abbiegevorgängen $n$ ermittelt werden kann.
+
+Im Folgenden soll nun versucht werden, den kürzesten Weg mit einer gewissen Anzahl an Abbiegevorgängen $m$ zu finden.
+Anfangs ist $m = n - 1$, falls ein solcher Weg existiert und Bilals Toleranz nicht überschreitet, wird $m$ um jeweils 1 verringert, bis eine der Bedingungen verletzt ist.
+Dadurch wird der Weg mit der niedrigsten Anzahl an Abbiegevorgängen, der Bilals Anforderungen genügt, gefunden.
+
+Wie auch anfangs verfolgt die modifizierte Version des Dijkstra-Algorithmus die Anzahl der Abbiegevorgänge, die benötigt werden, um auf eine Straße (zu einem Knoten) zu gelangen.
+Anders als zuvor fügt der Algorithmus der \textsc{PriorityQueue} keine Straßen hinzu, für die $>m$ Mal abgebogen werden muss.
+Zusätzlich wird es erlaubt, Knoten öfter zu besuchen, sofern bei den neuen Besuchen die Zahl der Abbiegevorgänge auf der Route geringer ist, als vorher.
+
+Somit werden nur Routen gefunden, die maximal $m$ Abbiegevorgänge haben.
+Auch werden keine Routen ignoriert, die zwar etwas länger sind, aber trotzdem die entsprechende Anzahl an Abbiegevorgängen aufweisen könnten.
 
 \section{Umsetzung}
 
