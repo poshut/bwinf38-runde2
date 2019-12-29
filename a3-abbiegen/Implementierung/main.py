@@ -5,61 +5,61 @@ import numpy as np
 import collections
 import itertools
 
-JUNCTIONS = {
-    0: (-1,0),
-    1: (0,0),
-    2: (1,0),
-    3: (1,1),
-    4: (1,2),
-    5: (0,2)
-}
-
-ROADS = {
-    0: {1},
-    1: {2,3,0},
-    2: {1,3},
-    3: {1,2,4},
-    4: {3,5},
-    5: {4}
-}
-
-SOURCE = 0
-TARGET = 5
-
 # JUNCTIONS = {
-#     0: (0,0),
-#     1: (1,0),
-#     2: (2,0),
-#     3: (3,0),
-#     4: (4,0),
-# 
-#     5: (0,1),
-#     6: (2,1),
-# 
-#     7: (0,2),
-#     8: (1,2),
-# 
-#     9: (0,3),
+#     0: (-1,0),
+#     1: (0,0),
+#     2: (1,0),
+#     3: (1,1),
+#     4: (1,2),
+#     5: (0,2)
 # }
-# 
-# SOURCE = 9
-# TARGET = 4
 # 
 # ROADS = {
-#     0: {1,5},
-#     1: {0,2,5,6},
-#     2: {1,3,6},
-#     3: {2,4,6},
-#     4: {3},
-# 
-#     5: {0,1,7,8},
-#     6: {1,2,3,8},
-# 
-#     7: {5,8,9},
-#     8: {7,5,6},
-# 
-#     9: {7},
+#     0: {1},
+#     1: {2,3,0},
+#     2: {1,3},
+#     3: {1,2,4},
+#     4: {3,5},
+#     5: {4}
 # }
+# 
+# SOURCE = 0
+# TARGET = 5
+
+JUNCTIONS = {
+    0: (0,0),
+    1: (1,0),
+    2: (2,0),
+    3: (3,0),
+    4: (4,0),
+
+    5: (0,1),
+    6: (2,1),
+
+    7: (0,2),
+    8: (1,2),
+
+    9: (0,3),
+}
+
+SOURCE = 9
+TARGET = 4
+
+ROADS = {
+    0: {1,5},
+    1: {0,2,5,6},
+    2: {1,3,6},
+    3: {2,4,6},
+    4: {3},
+
+    5: {0,1,7,8},
+    6: {1,2,3,8},
+
+    7: {5,8,9},
+    8: {7,5,6},
+
+    9: {7},
+}
 
 FLOAT_ERROR_DIGITS = 8
 
@@ -119,13 +119,13 @@ def build_graph(junctions, roads, source_junction, target_junction):
 def dijkstra(nodes, edges, sources, targets, number_turns=None):
     pq = queue.PriorityQueue()
     for source in sources:
-        pq.put((nodes[source], source, [source], 0))
+        pq.put((0, source, [source], 0))
 
     discovered = {}
     
     while True:
         if pq.empty():
-            exit("queue empty! there seems to be no route to the target node!")
+           return None, None, None
         prio, node, prev, turns = pq.get()
         if node in discovered and turns >= discovered[node]:
             continue
