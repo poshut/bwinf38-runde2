@@ -224,13 +224,18 @@ def scan(number, digit, aggregated_table, extended):
 
     if len(results) == 0:
         return None
+
+    # Use term with fewest digits. If there are multiple terms with the same number of digits, use the one that has fewer characters
     res = 0
     n = math.inf
+    c = math.inf
     for r in results:
         nr = r.number_of_digits()
-        if nr < n:
+        nc = len(str(res))
+        if nr < n or (nr == n and nc < c):
             res = r
             n = nr
+            c = nc
     return res
 
 def find_shortest(number, digit, extended, debug=False):
@@ -247,7 +252,7 @@ def find_shortest(number, digit, extended, debug=False):
         if res is not None:
             res_n = res.number_of_digits()
             if debug:
-            print("found", res, "with", res.number_of_digits(), "digits, looking if shorter is possible")
+                print("found", res, "with", res.number_of_digits(), "digits, looking if shorter is possible")
         i += 1
     return res
 
@@ -268,7 +273,7 @@ if __name__ == '__main__':
     res_normal = find_shortest(args.number, args.digit, False, args.verbose)
 
     if args.verbose:
-    print()
+        print()
         print("looking for extended shortest")
     res_extended = find_shortest(args.number, args.digit, True, args.verbose)
 
