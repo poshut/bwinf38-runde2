@@ -233,15 +233,7 @@ def scan(number, digit, aggregated_table, extended):
             n = nr
     return res
 
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Decompose a number into a term using one digit")
-    parser.add_argument("number", help="number to decompose", type=int)
-    parser.add_argument("digit", help="digit to decompose into", type=int)
-    parser.add_argument("--extended", "-e", help="allow the usage of power functions and factorials (extended mode)", action='store_true')
-    parser.add_argument("--verbose", "-v", help="enable verbose output", action='store_true')
-    args = parser.parse_args()
-
+def find_shortest(number, digit, extended, debug=False):
     aggregated_table = {}
     split_table = defaultdict(dict)
 
@@ -250,16 +242,42 @@ if __name__ == '__main__':
 
     # Generate tables until shortest result will be available with scan()
     while i <= res_n - 2:
-        aggregated_table, split_table = generate(args.digit, i, aggregated_table, split_table, args.extended, debug=args.verbose)
-        res = scan(args.number, args.digit, aggregated_table, args.verbose)
+        aggregated_table, split_table = generate(args.digit, i, aggregated_table, split_table, extended, debug=debug)
+        res = scan(number, digit, aggregated_table, extended)
         if res is not None:
             res_n = res.number_of_digits()
+            if debug:
             print("found", res, "with", res.number_of_digits(), "digits, looking if shorter is possible")
         i += 1
+    return res
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Decompose a number into a term using one digit")
+    parser.add_argument("number", help="number to decompose", type=int)
+    parser.add_argument("digit", help="digit to decompose into", type=int)
+    parser.add_argument("--verbose", "-v", help="enable verbose output", action='store_true')
+    args = parser.parse_args()
+
+    if len(str(args.digit)) != 1 or args.digit == 0:
+        print("Error:", args.digit, "is not a digit, exiting...", file=sys.stderr)
+        exit(1)
+
+    if args.verbose:
+        print("looking for normal shortest")
+    res_normal = find_shortest(args.number, args.digit, False, args.verbose)
+
+    if args.verbose:
+    print()
+        print("looking for extended shortest")
+    res_extended = find_shortest(args.number, args.digit, True, args.verbose)
+
+    if args.verbose:
+        print()
+    print("normal result", res_normal)
+    print("digits:", res_normal.number_of_digits())
 
     print()
-    print("result", res)
-    print("digits:", res.number_of_digits())
-
-
+    print("extended result", res_extended)
+    print("digits:", res_extended.number_of_digits())
 
