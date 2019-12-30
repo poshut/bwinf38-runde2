@@ -21,12 +21,14 @@
 % Für mathematische Befehle und Symbole
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{icomma}
 
 % Für Bilder
 \usepackage{graphicx}
 
 % Für Algorithmen
 \usepackage{algpseudocode}
+\usepackage{algorithm}
 
 % Für Quelltext
 \usepackage{listings}
@@ -84,11 +86,111 @@
 \tableofcontents
 
 \section{Lösungsidee}
+\subsection{Generierung der Tabelle}
+Meine Lösungsidee für das Problem besteht darin, alle möglichen Terme, die durch die gegebenen Rechenoperationen aus der gegebenen Ziffer erhalten werden können, in einer Tabelle zu speichern.
+Dabei wird nach der Anzahl der vorkommenden Ziffern verfahren:
+Angefangen wird bei $n=1$ Ziffern.
+Für $n=1$ Ziffern lässt sich ohne Berücksichtigung der Fakultätsfunktion nur ein Term finden, nämlich die Ziffer selbst.
+Für $n=[2, \infty)$ Ziffern werden Terme mit einer geringeren Anzahlen an Ziffern $i,j$ über die gegebenen Grundrechenarten kombiniert, sodass $n=i+j$.
+Dabei sollen die Terme bei den kommutativen Grundrechenarten ($+$, $*$) nicht vertauscht werden, da dort dasselbe Ergebnis entsteht, bei den nicht-kommutativen Grundrechenarten jedoch schon, da oft verschiedene Ergebnisse auftreten.
+
+Um beispielsweise alle Terme für $n=5$ zu finden, werden alle Terme mit $i=1$ und $j=4$ und mit $i=2$ und $j=3$ über das kartesische Produkt kombiniert und für alle Rechenarten und Reihenfolgen gespeichert.
+
+Es gibt vier Grundrechenarten, von denen zwei nicht-kommutativ sind.
+Dadurch ergeben sich sechs mögliche neue Terme durch jedes Termpaar, davon ausgehend, dass keine Dopplungen auftreten und alle Terme valide sind (z.B. keine Division durch 0):
+
+\begin{align*}
+N(1) &= 1 \\
+N(n) &= \sum_{i=1}^{n // 2}6i(n-i) \\
+\end{align*}
+
+Es ergeben sich die $N$, die in Abbildung \ref{fig:anzahl-terme} zu sehen sind.
+
+\begin{figure}[]
+  \centering
+  \begin{tabular}{|r|r|}
+  $n$ & $N(n)$ \\ \hline
+  1 & 1 \\ \hline
+  2 & 6 \\ \hline
+  3 & 36 \\ \hline
+  4 & 432 \\ \hline
+  5 & 3.888 \\ \hline
+  6 & 46.656 \\ \hline
+  7 & 513.216 \\ \hline
+  8 & 6.718.464 \\ \hline
+  9 & 78.941.952 \\ \hline
+  10 & 1.038.002.688 \\ \hline
+  11 & 12.939.761.664 \\ \hline
+  12 & 174.505.383.936 \\ 
+  \end{tabular}
+  \caption{Anzahl der möglichen Terme $N$ nach der Anzahl der vorkommenden Ziffern $n$}
+  \label{fig:anzahl-terme}
+\end{figure}
+
+\subsection{Scannen}
+Um die Laufzeit des Programms zu verbessern, wartet der Algorithmus nicht darauf, bis die Zahl in der Tabelle auftaucht, sondern überprüft, ob man zwei Terme aus der Tabelle durch eine Grundrechenart kombinieren kann, um auf das gewünschte Ergebnis zu kommen.
+Dieses Verfahren nenne ich \textit{Scan}.
+Dazu wird für jede Zahl $j$, für die ein Term in der Tabelle steht, ein Partner $p$ berechnet, mit dem das gewünschte Ergebnis $e$ erhalten werden kann.
+Dafür gibt es verschiedene Möglichkeiten:
+
+\begin{alignat*}{3}
+  e &= j + p \quad &\Leftrightarrow& \quad p = e - j \\
+  e &= j - p \quad &\Leftrightarrow& \quad p = j - e \\
+  e &= p - j \quad &\Leftrightarrow& \quad p = j + e \\
+  e &= p * j \quad &\Leftrightarrow& \quad p = \frac{e}{j} \\
+  e &= p / j \quad &\Leftrightarrow& \quad p = e * j \\
+  e &= j / p \quad &\Leftrightarrow& \quad p = \frac{j}{e}
+\end{alignat*}
+
+Für jedes $j$ werden nun alle möglichen Partner $p$ und es wird geschaut, ob $p$ Teil der Tabelle ist.
+Ist dies der Fall, wird es einer Menge hinzugefügt.
+Der Term mit der geringsten Anzahl an Ziffern der Menge ist ein mögliches Ergebnis.
+
+\subsection{Zusammenfügen}
+Es wird immer abwechselnd eine Tabelle mit einer Ziffer mehr als zuvor generiert und ein \textit{Scan} ausgeführt.
+Dies wird solange wiederholt, bis ein Scan ein Ergebnis mit $m$ Ziffern zurückgibt und eine Tabelle mit $m-2$ Ziffern vorliegt und ein Scan ausgeführt wurde.
+
+An diesem Punkt wird die beste Lösung verwendet, da eine Lösung mit $n=m-2$ Ziffern in der Tabelle stehen würde, der Scan eine Lösung mit $n=m-1$ Ziffern erkannt hätte und eine Lösung mit $n=m$ Ziffern bereits vorliegt.
+
+Der Algorithmus kann nicht schon bei der Tabelle mit $m-3$ Ziffern terminieren, da eine Lösung, die sich aus Termen mit einer Ziffer und $m-2$ Ziffern zusammensetzt, durch einen \textit{Scan} nicht erkannt werden würde, sodass der Algorithmus nicht die beste Lösung liefern würde.
+Algorithmus \ref{alg:combination} zeight die Kombination der Tabellengeneration und des Scans.
+
+
+\begin{algorithm}
+  \caption{Kombinieren von \textsc{Generate} und \textsc{Scan}, um den Term mit der geringsten Anzahl an Ziffern zu finden}
+  \begin{algorithmic}[1]
+    \State $i \gets 1$
+    \State $n \gets \infty$
+    \State $r \gets$ nil
+    \While{$i \leq n - 2$}
+        \State \Call{Generate}{i}
+        \State $r \gets$ \Call{Scan}{}
+        \If{$r \neq$ nil}
+          \State $n \gets$ \Call{Digits}{$r$}
+        \EndIf
+        \State $i \gets i+1$
+    \EndWhile
+    \State \textbf{return} r
+  \end{algorithmic}
+  \label{alg:combination}
+\end{algorithm}
+
+\subsection{Fakultät und Potenzieren}
+\todo{hinzufügen}
+
 
 \section{Umsetzung}
+\todo{hinzufügen}
+
+\subsection{Laufzeitanalyse}
+\todo{hinzufügen}
 
 \section{Beispiele}
+\todo{hinzufügen}
 
 \section{Quellcode (ausschnittsweise)}
+\todo{hinzufügen}
+
+\listoftodos
 
 \end{document}
