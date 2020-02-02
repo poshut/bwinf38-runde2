@@ -4,62 +4,7 @@ import queue
 import numpy as np
 import collections
 import itertools
-
-# JUNCTIONS = {
-#     0: (-1,0),
-#     1: (0,0),
-#     2: (1,0),
-#     3: (1,1),
-#     4: (1,2),
-#     5: (0,2)
-# }
-# 
-# ROADS = {
-#     0: {1},
-#     1: {2,3,0},
-#     2: {1,3},
-#     3: {1,2,4},
-#     4: {3,5},
-#     5: {4}
-# }
-# 
-# SOURCE = 0
-# TARGET = 5
-
-JUNCTIONS = {
-    0: (0,0),
-    1: (1,0),
-    2: (2,0),
-    3: (3,0),
-    4: (4,0),
-
-    5: (0,1),
-    6: (2,1),
-
-    7: (0,2),
-    8: (1,2),
-
-    9: (0,3),
-}
-
-SOURCE = 9
-TARGET = 4
-
-ROADS = {
-    0: {1,5},
-    1: {0,2,5,6},
-    2: {1,3,6},
-    3: {2,4,6},
-    4: {3},
-
-    5: {0,1,7,8},
-    6: {1,2,3,8},
-
-    7: {5,8,9},
-    8: {7,5,6},
-
-    9: {7},
-}
+from collections import defaultdict
 
 FLOAT_ERROR_DIGITS = 8
 
@@ -89,15 +34,15 @@ def build_graph(junctions, roads, source_junction, target_junction):
     nodes = dict()
     edges = collections.defaultdict(set)
 
-    for source in ROADS:
-        for target in ROADS[source]:
+    for source in roads:
+        for target in roads[source]:
             nodes[format_roadnode(source, target)] = distance(junctions[source], junctions[target])
     
-    for junction in JUNCTIONS:
-        for comb in itertools.combinations(ROADS[junction], 2):
-            pos0 = JUNCTIONS[comb[0]]
-            posj = JUNCTIONS[junction]
-            pos1 = JUNCTIONS[comb[1]]
+    for junction in junctions:
+        for comb in itertools.combinations(roads[junction], 2):
+            pos0 = junctions[comb[0]]
+            posj = junctions[junction]
+            pos1 = junctions[comb[1]]
             s = straight(pos0, posj, pos1)
             r0 = format_roadnode(comb[0], junction)
             r1 = format_roadnode(comb[1], junction)
@@ -106,11 +51,11 @@ def build_graph(junctions, roads, source_junction, target_junction):
     
 
     sources = set()
-    for next_junction in ROADS[source_junction]:
+    for next_junction in roads[source_junction]:
         sources.add(format_roadnode(source_junction, next_junction))
     
     targets = set()
-    for last_junction in ROADS[target_junction]:
+    for last_junction in roads[target_junction]:
         targets.add(format_roadnode(target_junction, last_junction))
 
 
@@ -151,28 +96,63 @@ def dijkstra(nodes, edges, sources, targets, number_turns=None):
 
     return prev, distance, turns
 
+def parse_tuple(t):
+    return tuple(map(int, t.replace('(', '').replace(')', '').split(",")))
 
+def parse_input(file):
+    with open(file) as f:
+        lines = f.read().split("\n")
+        start_coords = parse_tuple(lines[1])
+        end_coords = parse_tuple(lines[2])
+        lines_roads = lines[3:]
+
+        junctions = {}
+        roads = defaultdict(set)
+        junction_to_id = {}
+        i = 0
+        for line_road in lines_roads:
+            if line_road != "":
+                line_road_split = line_road.split(" ")
+                a = parse_tuple(line_road_split[0])
+                b = parse_tuple(line_road_split[1])
+                if a not in junction_to_id:
+                    junction_to_id[a] = i
+                    junctions[i] = a
+                    i += 1
+                if b not in junction_to_id:
+                    junction_to_id[b] = i
+                    junctions[i] = b
+                    i += 1
+                id_a = junction_to_id[a]
+                id_b = junction_to_id[b]
+                roads[id_a].add(id_b)
+                roads[id_b].add(id_a)
+        start = junction_to_id[start_coords]
+        end = junction_to_id[end_coords]
+        return junctions, roads, start, end
+                
 if __name__ == '__main__':
 
-    if len(sys.argv) < 2:
-        print("Usage", sys.argv[0], "<tolerance (percent)>", file=sys.stderr)
+    if len(sys.argv) < 3:
+        print("Usage", sys.argv[0], "<filename> <tolerance (percent)>", file=sys.stderr)
         exit(1)
     
     try:
-        TOLERANCE = int(sys.argv[1])
+        tolerance = int(sys.argv[2])
     except ValueError:
-        print("Usage", sys.argv[0], "<tolerance (percent)>", file=sys.stderr)
+        print("Usage", sys.argv[0], "<filename> <tolerance (percent)>", file=sys.stderr)
         exit(1)
 
 
-    nodes, edges, sources, targets = build_graph(JUNCTIONS, ROADS, SOURCE, TARGET)
+    junctions, roads, source, target = parse_input(sys.argv[1])
+    nodes, edges, sources, targets = build_graph(junctions, roads, source, target)
     min_path, min_distance, max_turns = dijkstra(nodes, edges, sources, targets)
 
     less_turns = 0
     while True:
         path, distance, turns = dijkstra(nodes, edges, sources, targets, number_turns=max_turns-less_turns)
 
-        if path is None or distance > min_distance * (1 + TOLERANCE/100):
+        if path is None or distance > min_distance * (1 + tolerance/100):
             break
 
         # print(' -> '.join(path))
@@ -182,13 +162,13 @@ if __name__ == '__main__':
         res_path, res_distance, res_turns = path, distance, turns
         less_turns += 1
 
-    junctions = [SOURCE]
+    path = [source]
     for road in res_path:
         j1, j2 = get_roadnode(road)
-        if junctions[-1] == j1:
-            junctions.append(j2)
+        if path[-1] == j1:
+            path.append(j2)
         else:
-            junctions.append(j1)
+            path.append(j1)
 
     print("Distance", round(res_distance, 2))
 
@@ -196,4 +176,4 @@ if __name__ == '__main__':
         print(res_turns, "turn")
     else:
         print(res_turns, "turns")
-    print(' -> '.join(map(str, junctions)))
+    print(' -> '.join(map(lambda j: str(junctions[j]), path)))
