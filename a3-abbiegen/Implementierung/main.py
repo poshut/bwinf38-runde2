@@ -139,6 +139,8 @@ if __name__ == '__main__':
     
     try:
         tolerance = int(sys.argv[2])
+        if tolerance < 0:
+            raise ValueError
     except ValueError:
         print("Usage", sys.argv[0], "<filename> <tolerance (percent)>", file=sys.stderr)
         exit(1)
