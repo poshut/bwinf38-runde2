@@ -176,6 +176,55 @@ Algorithmus \ref{alg:combination} zeight die Kombination der Tabellengeneration 
 \end{algorithm}
 
 \subsection{Fakultät und Potenzieren}
+Bei sowohl der Fakultätsfunktion als auch dem Potenzieren treten sehr große Zahlen auf, was das Programm extrem verlangsamen kann.
+Deshalb wird vor beiden Operationen bestimmt, wie viele Stellen das Ergebnis hat.
+Ist das Ergebnis zu lang, wird es nicht berechnet und auch nicht der Tabelle hinzugefügt.
+Für die maximale Länge des Ergebnisses wähle ich 100 Stellen, da auch wissenschaftliche Taschenrechner mit Zahlen jenseits dieser Höhe nicht zurechtkommen.
+
+\subsubsection{Potenzieren}
+Über den Zehnerlogarithmus und die Logarithmusgesetze kann die Länge des Ergebnisses schnell berechnet werden:
+
+\begin{align*}
+  N &= a^b \\
+  \Rightarrow \quad \mathrm{len}(N) &= \log_{10}a^b \\
+  \Leftrightarrow \quad \mathrm{len}(N) &= b * \log_{10}a
+\end{align*}
+
+Da das Potenzieren eine nicht-kommutative binäre Operation ist, ähnelt sie den Grundrechenarten und kann in der Generierung der Tabelle hinzugefügt werden, sodass für jede Kombination zweier Terme der Tabelle 8 neue Terme hinzugefügt werden.
+
+Dem \textit{Scan} wird auch zwei Prüfungen hinzugefügt, ob sich das Ergebnis $e$ durch einen Term der Tabelle $j$ und seinen Partner $p$ darstellen lassen:
+
+\begin{alignat*}{3}
+  e &= p ^ j \quad &\Leftrightarrow& \quad p = e ^ {\frac{1}{j}} \\
+  e &= j ^ p \quad &\Leftrightarrow& \quad p = \log_j e
+\end{alignat*}
+
+\subsubsection{Fakultätsfunktion}
+Aufgrund des schnellen Anstiegs der Fakultätsfunktion, kann die maximale Zahl, für die die Fa\-kul\-täts\-funk\-tion die gegebene maximale Anzahl an Stellen $l_{\mathrm{max}}$ nicht überschreitet, einfach berechnet werden.
+
+Da die Fakultätsfunktion eine unäre Funktion ist, verlangt sie nach keinen weiteren Ziffern.
+Ein Term und seine Fakultät haben deshalb dieselbe Anzahl an Stellen.
+Beim Erstellen der Tabelle wird dann jeder Term, der der Tabelle hinzugefügt wird und einen Wert $\geq 3$ und $\leq l_{\mathrm{max}}$ aufweist, auch als Fakultät der Tabelle hinzugefügt, sofern diese noch nicht enthalten ist.
+Dies wird rekursiv gelöst, damit beispielsweise auch $3!! = 720$ der Tabelle hinzugefügt wird.
+
+\begin{algorithm}
+  \caption{Prozedur, um der Tabelle einen Term hinzuzufügen, unter Berücksichtigung der Faktultätsfunktion}
+  \begin{algorithmic}[1]
+    \Procedure{AddToTable}{T}
+      \If{$3 \leq $ \Call{Value}{t} $\leq l_{\mathrm{max}}$}
+        \State $f \gets $ \Call{Factorial}{T}
+        \State \Call{AddToTable}{f}
+      \EndIf
+      \State $d \gets$ \Call{Digits}{T}
+      \If{$T \notin t$ $\land$ \Call{Digits}{T} $<$ \Call{Digits}{}}
+        \State \Call{Add}{t, T}
+      \EndIf
+    \EndProcedure
+  \end{algorithmic}
+  
+\end{algorithm}
+
+
 \todo{hinzufügen}
 
 
