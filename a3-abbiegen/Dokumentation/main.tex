@@ -31,6 +31,7 @@
 
 % Für Algorithmen
 \usepackage{algpseudocode}
+\usepackage{algorithm}
 
 % Für Quelltext
 \usepackage{listings}
@@ -59,6 +60,7 @@
 }
 
 \lstset{literate=%
+    {_}{{\_}}1
     {Ö}{{\"O}}1
     {Ä}{{\"A}}1
     {Ü}{{\"U}}1
@@ -88,16 +90,16 @@
 \tableofcontents
 
 \section{Lösungsidee}
+\label{sec:idea}
 Für die Beantwortung von Bilals Frage muss das Straßennetz zunächst als Datenstruktur repräsentiert werden.
 Daraufhin arbeite ich mit einer modifizierten Version des Dijkstra-Shortest-Path-Algorithmus, um einen Weg zu finden, dessen Länge innerhalb der gegebenen Grenzen liegt und auf dem so wenig wie möglich abgebogen werden muss.
 
 \subsection{Darstellung des Straßennetzes}
 \label{sec:idea:representation}
-\todo{Zwei Abbildungen einfügen}
-\todo{pseudocode}
 Straßennetze werden allgemein als gewichtete Graphen, d.h. Mengen von Knoten und Kanten zwischen diesen, repräsentiert.
 Normalerweise entsprechen dabei Knoten den Kreuzungen und Kanten den Straßen zwischen den Kreuzungen, ein sog. \textit{node-based-graph}.
 Dabei hat jede Kante ein Gewicht, d.h. einen ihr zugewiesenen numerischen Wert, der meistens der Länge der entsprechenden Straße entspricht.
+Das Beispiel aus der Aufgabenstellung ist in Abbildung \ref{fig:graph-idee} als \textit{node-based-graph} repräsentiert.
 
 \todo{weights for the edges}
 \begin{figure}
@@ -129,7 +131,7 @@ Dabei hat jede Kante ein Gewicht, d.h. einen ihr zugewiesenen numerischen Wert, 
     \draw (6) -- (3);
 \end{tikzpicture}
 \label{fig:graph-idee}
-\caption{Beispiel aus der Aufgabe, als \textit{node-based-graph} repräsentiert. \newline Knoten 9 ist dabei der Ausgangsknoten und Knoten 4 der Zielknoten}
+\caption{Beispiel aus der Aufgabe, als \textit{node-based-graph}, zur Übersichtlichkeit ohne entsprechende Gewichte, repräsentiert. Knoten 9 ist dabei der Ausgangsknoten und Knoten 4 der Zielknoten}
 \end{figure}
 
 
@@ -140,6 +142,7 @@ Dabei wird jede Straße als Knoten repräsentiert.
 Für jede Möglichkeit, von einer Straße auf eine andere zu gelangen, wird eine Kante zwischen den zwei entsprechenden Knoten hinzugefügt.
 Falls zwischen den Straßen abgebogen werden muss, kann dies entweder als Gewicht der Kante dargestellt werden oder ein einfaches \textsc{Wahr} oder \textsc{Falsch} für jede Kante gespeichert werden.
 Die Länge jeder Straße muss für einen \textit{edge-based-graph} für jeden Knoten statt für jede Kante gespeichert werden.
+Das Beispiel aus der Aufgabe ist in Abbildung \ref{fig:edge-based-graph} als \textit{edge-based-graph} repräsentiert.
 
 \begin{figure}
 \centering
@@ -186,6 +189,7 @@ Die Länge jeder Straße muss für einen \textit{edge-based-graph} für jeden Kn
 
 \end{tikzpicture}
 \caption{Beispiel aus der Aufgabe, als \textit{edge-based-graph} repräsentiert, hier ohne Gewicht}
+\label{fig:edge-based-graph}
 \end{figure}
 
 \subsection{Finden des optimalen Weges}
@@ -202,8 +206,8 @@ Im Folgenden soll nun versucht werden, den kürzesten Weg mit einer gewissen Anz
 Anfangs ist $m = n - 1$, falls ein solcher Weg existiert und Bilals Toleranz nicht überschreitet, wird $m$ um jeweils 1 verringert, bis eine der Bedingungen verletzt ist.
 Dadurch wird der Weg mit der niedrigsten Anzahl an Abbiegevorgängen, der Bilals Anforderungen genügt, gefunden.
 
-Wie auch anfangs verfolgt die modifizierte Version des Dijkstra-Algorithmus die Anzahl der Abbiegevorgänge, die benötigt werden, um auf eine Straße (zu einem Knoten) zu gelangen.
-Anders als zuvor fügt der Algorithmus der \textsc{PriorityQueue} keine Straßen hinzu, für die $>m$ Mal abgebogen werden muss.
+Wie auch anfangs, verfolgt die modifizierte Version des Dijkstra-Algorithmus die Anzahl der Abbiegevorgänge, die benötigt werden, um auf eine Straße (zu einem Knoten) zu gelangen.
+Anders als zuvor fügt jedoch der Algorithmus der \textsc{PriorityQueue} keine Straßen hinzu, für die $>m$ Mal abgebogen werden muss.
 Zusätzlich wird es erlaubt, Knoten öfter zu besuchen, sofern bei den neuen Besuchen die Zahl der Abbiegevorgänge auf der Route geringer ist, als vorher.
 
 Somit werden nur Routen gefunden, die maximal $m$ Abbiegevorgänge haben.
@@ -212,10 +216,282 @@ Auch werden keine Routen ignoriert, die zwar etwas länger sind, aber trotzdem d
 \section{Umsetzung}
 
 Ich habe die Lösungsidee in Python 3 umgesetzt.
-\todo{Umsetzung}
+
+\subsection{Aus der Eingabedatei zum \textit{node-based-graph}}
+
+Dazu wird zuerst die Eingabedatei in einen \textit{node-based-graph} eingelesen.
+Die eingelesenen Kreuzungen werden als \texttt{dict} repräsentiert: Dabei erhält jede Kreuzung einen Schlüssel, die sie eindeutig identifiziert.
+Die Schlüssel der Kreuzung sind jeweils die Schlüssel des \texttt{dict}s.
+Die Werte des \texttt{dict}s sind die Koordinaten der Kreuzung.
+
+Auch die Straßen werden als \texttt{dict} repräsentiert: Dabei werden als Schüssel der Schlüssel der Startkreuzung der Straße verwendet und als Wert eine Menge mit den Schlüsseln aller Kreuzungen, mit denen die Startkreuzung verbunden ist.
+
+Das Beispiel aus der Aufgabe wird folgendermaßen repräsentiert:
+
+\begin{lstlisting}[language=Python]
+junctions = {
+  0: (0, 0), 
+  1: (0, 1), 
+  2: (0, 2), 
+  3: (0, 3), 
+  4: (1, 1), 
+  5: (1, 3), 
+  6: (2, 2), 
+  7: (2, 3), 
+  8: (3, 3), 
+  9: (4, 3)
+} 
+ 
+roads = {
+  0: {1}, 
+  1: {0, 2, 4}, 
+  2: {1, 3, 4, 5}, 
+  3: {2, 5}, 
+  4: {1, 2, 6}, 
+  5: {2, 3, 6, 7}, 
+  6: {8, 4, 5, 7}, 
+  7: {8, 5, 6}, 
+  8: {9, 6, 7}, 
+  9: {8}
+}
+\end{lstlisting}
+
+\subsection{Vom node-based-graph zum edge-based-graph}
+Als nächster Schritt wandelt das Programm den \textit{node-based-graph} in einen \textit{edge-based-graph} um.
+Alle Straßen erhalten zuerst einheitliche Namen: Dazu werden die Schlüssel ihrer Start- und Endkreuzungen sortiert und mit einem Unterstrich verbunden.
+Daraufhin werden sie mit ihrer Länge als Knoten in einem \texttt{dict} (\texttt{nodes}) gespeichert.
+Die Kanten des \textit{edge-based-graphs} bilden die Kreuzungen.
+Dabei wird jede Möglichkeit, auf eine andere Straße zu wechseln, einzeln zusammen mit der Information, ob für diesen Wechsel abgebogen werden muss, gespeichert.
+Dies geschieht erneut in einem \texttt{dict}, dessen Schlüssel der Name einer Straße bildet.
+Der Wert ist jeweils eine Liste von \texttt{tuple}n, in denen der Name der nächsten Straße und ob man geradeaus weiterfahren muss, gespeichert ist.
+Durch die Umwandlung in einen \textit{edge-based-graph} gibt es nicht mehr nurnoch ein Ziel, sondern eine Menge an Straßen, von denen man das Ziel sofort erreicht.
+Im Programm wird dies als \textit{set} repräsentiert, das die Namen aller Straßen, die mit der Zielkreuzung verbunden sind, enthält.
+Analog wird auch ein \texttt{set} erstellt, das die Namen aller Ausgangsstraßen enthält.
+
+Um herauszufinden, ob man bei einem Straßenwechsel abbiegen muss, wird der Winkel zwischen den beiden Vektoren der Straßen berechnet.
+Es gilt:
+
+\begin{align*}
+  \vec{a}*\vec{b} &= |\vec{a}||\vec{b}|\cos{\alpha} \\
+  \Leftrightarrow \cos{\alpha} &= \frac{\vec{a}*\vec{b}}{|\vec{a}||\vec{b}|}
+\end{align*}
+
+Da $\alpha = 180^{\circ}$
+\begin{align*}
+  \frac{\vec{a}*\vec{b}}{|\vec{a}||\vec{b}|} &= -1 \\
+\end{align*}
+
+
+Für das Beispiel aus der Aufgabe sehen die Datenstrukturen folgendermaßen aus (mit Auslassungen):
+
+\input{tikz/data.tex}
+
+Im Folgenden wird der Algorithmus aus Abschnitt \ref{sec:idea} ausgeführt.
+Dazu wird eine Funktion \texttt{dijkstra} definiert, der den kürzesten Weg zum Ziel mit höchstens \texttt{number\_turns} Abbiegevorgängen findet und zurückgibt.
+Diese arbeitet mithilfer der \texttt{PriorityQueue} aus dem Paket \texttt{queue}.
+Ein Element der PriorityQueue ist ein \texttt{tuple} und enthält die bisherige Weglänge (Priorität, mit der die \texttt{PriorityQueue} die Elemente ordnet, nach dem Dijkstra-Shortest-Path-Algorithmus), den vorherigen Knoten des \textit{edge-based-graph}s sowie der gesamte Weg bis zum Knoten und die Anzahl an Abbiegevorgängen.
+Wird ein neuer Knoten von dem vorherigen aus erreicht, werden die Gesamtweglänge, der vorherige Knoten, der Gesamtweg und die Anzahl an Abbiegevorgängen entsprechend angepasst und verändert der PriorityQueue hinzugefügt.
+
+Falls auf einem Weg bereits \texttt{number\_turns} abgebogen wurde und für den nächsten Knoten ein Abbiegevorgang benötigt wird, wird dieser nicht der \texttt{PriorityQueue} hinzugefügt, sodass nur Wege mit einer Maximalanzahl an Abbiegevorgängen von \texttt{number\_turns} zurückgegeben werden können.
+
+Ist die \texttt{PriorityQueue} leer, so existiert kein Weg mit \texttt{number\_turns} oder weniger Abbiegevorgängen.
+Die Funktion \texttt{dijkstra} gibt entsprechend \texttt{None} zurück.
+
+Wird kein Weg mit $m$ Abbiegevorgängen gefunden oder überschreitet dessen Länge Bilals Toleranz, wird der letztgefundene Weg verwendet.
+Zur Ausgabe müssen die Knoten des \textit{edge-based-graph}s wieder in Knoten des \textit{node-based-graph}s umgewandelt werden.
+Dazu werden die Schlüssel der Knoten des \textit{edge-based-graph}s aufgeteilt, sodass je zwei Schlüssel des \textit{node-based-graph}s erhalten werden (siehe oben).
+Nun wird überprüft, von welcher Kreuzung Bilal auf die Straße fährt und die neue Kreuzung wird an die Liste an Kreuzungsschlüsseln \texttt{path} angehängt.
+Mithilfe des \texttt{dict}s \texttt{junctions} werden nun den Kreuzungsschlüsseln Koordinaten zugeordnet, die mit der Weglänge und der Anzahl an Abbiegevorgängen ausgegeben werden.
+
+\subsection{Visualisierung}
+Mithilfe des \LaTeX-Pakets \texttt{tikz} lassen sich Graphen einfach visualisieren.
+Im Python-Code ist deshalb auch eine Funktion \texttt{visualize} enthalten, die eine Datei \texttt{\_visualize.tex} erstellt, die, durch \LaTeX kom\-pi\-liert, eine grafische Repräsentation der Eingabedatei zeigt.
+Bei der Visualisierung wird die Startkreuzung grün markiert und die Endkreuzung rot markiert.
+$x$ und $y$-Koordinaten können wie im ersten Quadranten in einem Koordinatensystem verwendet werden.
+
+\subsection{Laufzeit}
+Die Laufzeit des Programms ist in allen getesteten Beispielen kein Problem.
+Selbst für das längste Beispiel benötigt das Programm weniger als $0.2 \textrm{s}$.
 
 \section{Beispiele}
-\todo{Beispiele}
+Zu jedem Beispiel drucke ich die grafische Repräsentation des Beispiels sowie die Programmausgabe und die Zeit, die zur Ausführung benötigt wird
+
+\subsection{Beispiel aus der Aufgabenstellung}
+Die Ergebnisse des Programms beim Beispiel aus der Aufgabenstellung entsprechen in allen Aspekten der Aufgabenstellung.
+\subsubsection{Visualisierung}
+\input{tikz/vis0.tex}
+
+\subsubsection{0\% Toleranz}
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen0.txt 0
+Distance 5.83
+3 turns
+(0, 0) -> (0, 1) -> (1, 1) -> (2, 2) -> (3, 3) -> (4, 3)
+\end{lstlisting}
+
+\subsubsection{15\% Toleranz}
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen0.txt 15
+Distance 6.41
+2 turns
+\end{lstlisting}
+
+\subsubsection{30\% Toleranz}
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen0.txt 30
+Distance 7.0
+1 turn
+(0, 0) -> (0, 1) -> (0, 2) -> (0, 3) -> (1, 3) -> (2, 3) -> (3, 3) -> (4, 3)
+\end{lstlisting}
+
+\subsection{Beispiel 1 von der Website}
+\subsubsection{Visualisierung}
+\input{tikz/vis1.tex}
+
+\subsubsection{0\% Toleranz}
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen1.txt 0
+Distance 17.3
+6 turns
+(0, 0) -> (1, 1) -> (2, 1) -> (3, 1) -> (4, 1) -> (5, 1) -> (7, 2) -> (9, 3) -> (10, 2) -> (10, 1) -> (11, 1) -> (12, 1) -> (13, 1) -> (14, 1) -> (14, 0)
+\end{lstlisting}
+
+\subsubsection{15\% Toleranz}
+Mit 15\% Toleranz lässt sich die Anzahl an Abbiegevorgängen von 6 auf 5 reduzieren:
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen1.txt 15
+Distance 19.12
+5 turns
+(0, 0) -> (1, 1) -> (2, 1) -> (3, 1) -> (4, 1) -> (5, 1) -> (7, 2) -> (9, 3) -> (11, 4) -> (11, 3) -> (12, 3) -> (13, 3) -> (14, 3) -> (14, 2) -> (14, 1) -> (14, 0)
+\end{lstlisting}
+
+\subsubsection{30\% Toleranz}
+Auch mit 30\% Toleranz findet sich kein Weg mit weniger Abbiegevorgängen:
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen1.txt 30
+Distance 19.12
+5 turns
+(0, 0) -> (1, 1) -> (2, 1) -> (3, 1) -> (4, 1) -> (5, 1) -> (7, 2) -> (9, 3) -> (11, 4) -> (11, 3) -> (12, 3) -> (13, 3) -> (14, 3) -> (14, 2) -> (14, 1) -> (14, 0)
+\end{lstlisting}
+
+
+\subsection{Beispiel 2 von der Website}
+\subsubsection{Visualisierung}
+\input{tikz/vis2.tex}
+
+\subsubsection{0\% Toleranz}
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen2.txt 0
+Distance 10.89
+6 turns
+(0, 0) -> (1, 0) -> (2, 0) -> (4, 1) -> (5, 1) -> (7, 2) -> (8, 2) -> (9, 1) -> (9, 0)
+\end{lstlisting}
+
+\subsubsection{15\% Toleranz}
+Mit 15\% Toleranz kann die Anzahl an Abbiegevorgängen von 6 auf 5 verringert werden:
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen2.txt 15
+Distance 11.06
+5 turns
+(0, 0) -> (1, 0) -> (2, 0) -> (4, 1) -> (5, 1) -> (6, 1) -> (7, 1) -> (8, 2) -> (9, 1) -> (9, 0)
+\end{lstlisting}
+
+\subsubsection{30\% Toleranz}
+Mit 30\% Toleranz kann die Anzahl an Abbiegevorgängen von 5 auf 4 verringert werden:
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen2.txt 30
+Distance 13.06
+4 turns
+(0, 0) -> (1, 0) -> (2, 0) -> (4, 1) -> (5, 1) -> (6, 1) -> (7, 1) -> (8, 2) -> (9, 3) -> (9, 2) -> (9, 1) -> (9, 0)
+\end{lstlisting}
+
+\subsubsection{50\% Toleranz}
+Mit 50\% Toleranz kann die Anzahl an Abbiegevorgängen von 4 auf 3 verringert werden:
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen2.txt 50
+Distance 15.94
+3 turns
+(0, 0) -> (1, 2) -> (3, 3) -> (5, 4) -> (7, 5) -> (8, 5) -> (9, 5) -> (9, 4) -> (9, 3) -> (9, 2) -> (9, 1) -> (9, 0)
+\end{lstlisting}
+
+
+\subsection{Beispiel 3 von der Website}
+Bei diesem Beispiel ist der kürzeste Weg bereits der mit der geringsten Anzahl an Abbiegevorgängen.
+\subsubsection{Visualisierung}
+\input{tikz/vis3.tex}
+
+\subsubsection{0\% Toleranz}
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen3.txt 0
+Distance 17.3
+6 turns
+(0, 0) -> (1, 1) -> (2, 1) -> (3, 1) -> (4, 1) -> (5, 1) -> (7, 2) -> (9, 3) -> (10, 2) -> (10, 1) -> (11, 1) -> (12, 1) -> (13, 1) -> (14, 1) -> (14, 0)
+\end{lstlisting}
+
+\subsubsection{15\% Toleranz}
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen3.txt 15
+Distance 17.3
+6 turns
+(0, 0) -> (1, 1) -> (2, 1) -> (3, 1) -> (4, 1) -> (5, 1) -> (7, 2) -> (9, 3) -> (10, 2) -> (10, 1) -> (11, 1) -> (12, 1) -> (13, 1) -> (14, 1) -> (14, 0)
+\end{lstlisting}
+
+\subsubsection{30\% Toleranz}
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen3.txt 30
+Distance 17.3
+6 turns
+(0, 0) -> (1, 1) -> (2, 1) -> (3, 1) -> (4, 1) -> (5, 1) -> (7, 2) -> (9, 3) -> (10, 2) -> (10, 1) -> (11, 1) -> (12, 1) -> (13, 1) -> (14, 1) -> (14, 0)
+\end{lstlisting}
+
+\subsection{Eingabedatei existiert nicht}
+Falls die Eingabedatei nicht existiert, wird ein Fehler zurückgegeben:
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen.txt 0
+Traceback (most recent call last):
+  File "main.py", line 169, in <module>
+    junctions, roads, source, target = parse_input(sys.argv[1])
+  File "main.py", line 103, in parse_input
+    with open(file) as f:
+FileNotFoundError: [Errno 2] No such file or directory: '../../material/a3-abbiegen/abbiegen.txt'
+\end{lstlisting}
+
+\subsection{Toleranz keine Zahl oder negativ}
+Ist die Toleranz keine Zahl oder negativ, wird ein Fehler zurückgegeben:
+\begin{lstlisting}
+$ python main.py ../../material/a3-abbiegen/abbiegen.txt -1
+Usage main.py <filename> <tolerance (percent)>
+\end{lstlisting}
+
+\subsection{Zu wenig Parameter}
+Sind zu wenig Parameter angegeben, wird ein Fehler zurückgegeben:
+\begin{lstlisting}
+$ python main.py
+Usage main.py <filename> <tolerance (percent)>
+\end{lstlisting}
+
+\subsection{Kein Weg zum Ziel}
+Führt kein Weg zum Ziel, wird ein Fehler zurückgegeben.
+
+\subsubsection{Eingabedatei}
+Die Eingabedatei \texttt{error.txt}:
+\begin{lstlisting}
+2
+(0,0)
+(1,1)
+(0,0) (1,0)
+(0,1) (1,1)
+\end{lstlisting}
+
+\subsubsection{Visualisierung}
+\input{tikz/vis_error.tex}
+
+\subsubsection{Ausgabe}
+Die Programmausgabe:
+\begin{lstlisting}
+$ python main.py error.txt 0
+Error: Cannot find any path from source to target in road network!
+\end{lstlisting}
 
 \section{Quellcode (ausschnittsweise)}
 \todo{Quellcode (ausschnittsweise)}

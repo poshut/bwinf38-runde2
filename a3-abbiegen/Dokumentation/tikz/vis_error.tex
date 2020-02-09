@@ -1,0 +1,11 @@
+\begin{tikzpicture}
+[auto=left,every node/.style={circle,fill=blue!20}]
+\node [style={fill=green!60}] (0) at (0, 0) {0};
+\node (1) at (1, 0) {1};
+\node (2) at (0, 1) {2};
+\node [style={fill=red!60}] (3) at (1, 1) {3};
+\draw (0) -- (1);
+\draw (1) -- (0);
+\draw (2) -- (3);
+\draw (3) -- (2);
+\end{tikzpicture}
