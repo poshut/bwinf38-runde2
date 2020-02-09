@@ -169,6 +169,9 @@ if __name__ == '__main__':
     visualize(junctions, roads, source, target)
     nodes, edges, sources, targets = build_graph(junctions, roads, source, target)
     min_path, min_distance, max_turns = dijkstra(nodes, edges, sources, targets)
+    if min_path is None:
+        print("Error: Cannot find any path from source to target in road network!")
+        exit(1)
 
     less_turns = 0
     while True:
