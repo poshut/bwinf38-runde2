@@ -6,6 +6,7 @@ import collections
 import itertools
 from collections import defaultdict
 
+# Auf wie viele Ziffern wird der Quotient gerundet, wenn ermittelt wird, ob an einer Kreuzung abgebogen werden muss?
 FLOAT_ERROR_DIGITS = 8
 
 def straight(p1, junc, p2):
