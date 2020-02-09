@@ -131,6 +131,25 @@ def parse_input(file):
         end = junction_to_id[end_coords]
         return junctions, roads, start, end
                 
+def visualize(junctions, roads, start, end):
+    """
+    Erstelle die Datei _visualize.tex, deren Ausgabe das Netzwerk grafisch darstellt.
+    """
+    with open("_visualize.tex", 'w') as f:
+        print("\\documentclass{standalone}\n\\usepackage{tikz}\n\\begin{document}\n\\begin{tikzpicture}", file=f)
+        print("[auto=left,every node/.style={circle,fill=blue!20}]", file=f)
+        for i in junctions:
+            if i == start:
+                print("\\node [style={fill=green!60}]", "(" + str(i) + ")", "at", junctions[i], "{" + str(i) + "};", file=f)
+            elif i == end:
+                print("\\node [style={fill=red!60}]", "(" + str(i) + ")", "at", junctions[i], "{" + str(i) + "};", file=f)
+            else:
+                print("\\node", "(" + str(i) + ")", "at", junctions[i], "{" + str(i) + "};", file=f)
+        for i in roads:
+            for j in roads[i]:
+                print("\\draw", "(" + str(i) + ")", "--", "(" + str(j) + ");", file=f)
+        print("\\end{tikzpicture}\n\\end{document}", file=f)
+                
 if __name__ == '__main__':
 
     if len(sys.argv) < 3:
@@ -147,6 +166,7 @@ if __name__ == '__main__':
 
 
     junctions, roads, source, target = parse_input(sys.argv[1])
+    visualize(junctions, roads, source, target)
     nodes, edges, sources, targets = build_graph(junctions, roads, source, target)
     min_path, min_distance, max_turns = dijkstra(nodes, edges, sources, targets)
 
