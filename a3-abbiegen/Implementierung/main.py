@@ -129,8 +129,8 @@ def parse_input(file):
                 roads[id_b].add(id_a)
         start = junction_to_id[start_coords]
         end = junction_to_id[end_coords]
-        return junctions, roads, start, end
-                
+    return junctions, roads, start, end
+
 def visualize(junctions, roads, start, end):
     """
     Erstelle die Datei _visualize.tex, deren Ausgabe das Netzwerk grafisch darstellt.
@@ -180,10 +180,6 @@ if __name__ == '__main__':
         if path is None or distance > min_distance * (1 + tolerance/100):
             break
 
-        # print(' -> '.join(path))
-        # print("Distance", distance)
-        # print(turns, "turns")
-        # print()
         res_path, res_distance, res_turns = path, distance, turns
         less_turns += 1
 
