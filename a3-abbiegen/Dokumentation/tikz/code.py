@@ -156,38 +156,10 @@ def parse_input(file):
     return junctions, roads, start, end
 
 def visualize(junctions, roads, start, end):
-    """
-    Die Datei _visualize.tex erstellen, deren Ausgabe das Netzwerk grafisch darstellt
-    """
-    with open("_visualize.tex", 'w') as f:
-        print("\\documentclass{standalone}\n\\usepackage{tikz}\n\\begin{document}\n\\begin{tikzpicture}", file=f)
-        print("[auto=left,every node/.style={circle,fill=blue!20}]", file=f)
-        for i in junctions:
-            if i == start:
-                print("\\node [style={fill=green!60}]", "(" + str(i) + ")", "at", junctions[i], "{" + str(i) + "};", file=f)
-            elif i == end:
-                print("\\node [style={fill=red!60}]", "(" + str(i) + ")", "at", junctions[i], "{" + str(i) + "};", file=f)
-            else:
-                print("\\node", "(" + str(i) + ")", "at", junctions[i], "{" + str(i) + "};", file=f)
-        for i in roads:
-            for j in roads[i]:
-                print("\\draw", "(" + str(i) + ")", "--", "(" + str(j) + ");", file=f)
-        print("\\end{tikzpicture}\n\\end{document}", file=f)
+    ...
                 
 if __name__ == '__main__':
-
-    if len(sys.argv) < 3:
-        print("Usage", sys.argv[0], "<filename> <tolerance (percent)>", file=sys.stderr)
-        exit(1)
-    
-    try:
-        tolerance = int(sys.argv[2])
-        if tolerance < 0:
-            raise ValueError
-    except ValueError:
-        print("Usage", sys.argv[0], "<filename> <tolerance (percent)>", file=sys.stderr)
-        exit(1)
-
+    ...
 
     junctions, roads, source, target = parse_input(sys.argv[1])
     visualize(junctions, roads, source, target)
