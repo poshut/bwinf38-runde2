@@ -25,6 +25,7 @@
 
 % Für Bilder
 \usepackage{graphicx}
+\usepackage{svg}
 
 % Für Algorithmen
 \usepackage{algpseudocode}
@@ -57,6 +58,7 @@
 }
 
 \lstset{literate=%
+    {_}{{\_}}1
     {Ö}{{\"O}}1
     {Ä}{{\"A}}1
     {Ü}{{\"U}}1
@@ -86,6 +88,7 @@
 \tableofcontents
 
 \section{Lösungsidee}
+\label{sec:idea}
 \subsection{Generierung der Tabelle}
 Meine Lösungsidee für das Problem besteht darin, alle möglichen Terme, die durch die gegebenen Rechenoperationen aus der gegebenen Ziffer erhalten werden können, in einer Tabelle zu speichern.
 Dabei wird nach der Anzahl der vorkommenden Ziffern verfahren:
@@ -128,6 +131,7 @@ Es ergeben sich die $N$, die in Abbildung \ref{fig:anzahl-terme} zu sehen sind.
 \end{figure}
 
 \subsection{Scannen}
+\label{sec:idea:scan}
 Um die Laufzeit des Programms zu verbessern, wartet der Algorithmus nicht darauf, bis die Zahl in der Tabelle auftaucht, sondern überprüft, ob man zwei Terme aus der Tabelle durch eine Grundrechenart kombinieren kann, um auf das gewünschte Ergebnis zu kommen.
 Dieses Verfahren nenne ich \textit{Scan}.
 Dazu wird für jede Zahl $j$, für die ein Term in der Tabelle steht, ein Partner $p$ berechnet, mit dem das gewünschte Ergebnis $e$ erhalten werden kann.
@@ -225,21 +229,227 @@ Dies wird rekursiv gelöst, damit beispielsweise auch $3!! = 720$ der Tabelle hi
 \end{algorithm}
 
 
-\todo{hinzufügen}
-
-
 \section{Umsetzung}
-\todo{hinzufügen}
+Ich habe die in Abschnitt \ref{sec:idea} geschilderte Lösungsidee in Python 3 umgesetzt.
+
+\subsection{Repräsentation eines Terms}
+Ich arbeite mit den objektorientierten Features von Python, um Terme als Datenstrukturen zu repräsentieren.
+
+Dazu definiere ich eine Superklasse \texttt{Term}, die alle Methoden enthält, die Subklassen auch bereitstellen müssen.
+Diese Methoden lösen bei \texttt{Term} einen \texttt{NotImplementedError} aus, sodass sofort auffällt, wenn eine Subklasse eine der Methoden nicht implementiert.
+Die Methoden von \texttt{Term} sind die folgenden:
+\begin{itemize}
+  \item \texttt{number\_of\_digits}: Diese Methode gibt die Anzahl der im Term vorkommenden Ziffern zurück.
+  \item \texttt{value}: Diese Methode gibt den numerischen Wert des gesamten Terms zurück.
+  \item \texttt{\_\_str\_\_}: Diese Methode gibt den Term als Textrepräsentation zurück.
+  \item \texttt{\_\_repr\_\_}: Diese Methode gibt im Fall von \texttt{Term} den Term auch den Term als Textrepräsentation zurück.
+  Sie ist so defininiert, dass sie dasselbe Ergebnis wie \texttt{\_\_str\_\_} zurückgibt.
+\end{itemize}
+
+Nun gibt es verschiedene Varianten eines Terms.
+
+Die einfachste Variante ist eine Zahl, die eine gewisse Ziffer ein- oder mehrmals enthält (un zwar nur diese).
+Die Klasse heißt \texttt{Number} und erhält ihren Wert als Konstruktorargument.
+Ihr numerischer Wert gleicht logischerweise ihrem inneren Wert.
+Die Anzahl an Stellen lässt sich durch die Länge der Textrepräsentation berechnen.
+Ihre Textrepräsentation ist die Zahl als \texttt{str}.
+
+Die zweite Möglichkeit eines Terms ist eine unäre Operation, d.h. eine Operation, die auf einem Term operiert.
+Im Fall der Aufgabenstellung ist dies nur die Fakultätsfunktion.
+Die Klasse heißt \texttt{UnaryOperation} und erhält in ihrem Konstruktor den Term und die entsprechende Operation (nur \texttt{O\_FAC} erlaubt).
+Die Berechnung erfolgt, indem die Fakultätsfunktion für den Wert des inneren Terms berechnet wird.
+Als Text wird die unäre Operation repräsentiert, indem der Term, gefolgt von einem \textit{!} in Klammern gesetzt wird.
+
+Die dritte Möglichkeit eines Terms ist die binäre Operation, d.h. eine Operation die auf zwei Termen operiert.
+Im Fall der Aufgabenstellung sind dies die vier Grundrechenarten sowie die Potenzfunktion.
+Die Klasse heißt \texttt{BinaryOperation} und erhält in ihrem Konstruktor die beiden Terme und die entsprechende Operation (nur \texttt{OP\_ADD}, \texttt{OP\_SUB}, \texttt{OP\_MULT}, \texttt{OP\_DIV}, \texttt{OP\_POW} erlaubt).
+Die Berechnung erfolgt, in dem die Operation auf die Werte der beiden inneren Terme ausgeführt wird.
+Als Text wird die binäre Operation repräsentiert, indem die Terme, getrennt durch das Symbol der entsprechenden Operation, in Klammern gesetzt werden.
+
+Durch das Einklammern aller zusammengesetzten Terme sorgt das Programm dafür, dass am Ende keine Probleme mit der Präzedenz der Operatoren auftreten.
+
+\subsection{Datenstruktur der Tabelle}
+Die Tabelle, die einer Zahl den Term mit der geringsten Anzahl an Ziffern zuordnet, stelle ich als \texttt{dict} dar.
+Dabei ist der Schlüssel des \texttt{dict}s die Zahl selbst und der Wert ein Tupel aus einem \texttt{Term}-Objekt und der Anzahl an Ziffern im Term, die zwischengespeichert wird, um die Geschwindigkeit des Programms zu erhöhen.
+Beispielhaft sieht die Tabelle für $n=1$ und $N=2$ mit Erlauben der Fakultätsfunktion folgendermaßen aus (die Repräsentation als Zeichenkette der Terme ist abgedruckt):
+
+\begin{lstlisting}[language=Python]
+{
+  1: (1, 1),
+  39916800: ((11!), 2),
+  11: (11, 2),
+  2: ((1+1), 2),
+  0: ((1-1), 2)
+}
+\end{lstlisting}
+
+\subsection{Generierung der Tabelle}
+Ich definiere eine Funktion \texttt{add\_to\_table}, die einer Tabelle einen Term hinzufügt.
+Dabei überprüft die Funktion, ob ein Term mit gleich vielen oder weniger Ziffern bereits in der Tabelle existiert und fügt ihn ihr sonst hinzu.
+Zustätzlich kann ein Parameter übergeben werden (\texttt{extended}), der festlegt, ob die Funktion auch die Fakultät des Terms hinzufügen soll.
+Um Berechnungen zu vermeiden, bei denen sehr lange Zahlen entstehen, wird die Fakultät eines Terms nur aufgenommen, falls sie 100 oder weniger Stellen besitzt.
+Der höchste erlaubte Wert eines Terms, dessen Fakultät in die Tabelle aufgenommen wird, wird am Anfang des Programms berechnet und in \texttt{MAX\_FACTORIAL} gespeichert.
+In diesem Prozess wird zusätzlich ein \texttt{dict} erstellt (\texttt{FACTORIALS}), das einem Ergebnis der Fakultätsfunktion seinem Parameter zuordnet.
+Dieses \texttt{dict} wird später in Abschnitt \ref{sec:implementation:scan} verwendet.
+
+Die Funktion \texttt{generate} generiert alle Terme der Tabelle, die \texttt{num\_digits} Ziffern enthalten.
+Dabei differenziert die Funktion zwischen zwei Tabellen: Der \texttt{aggegated\_table} und der \texttt{split\_table}.
+
+Die \texttt{aggregated\_table} enthält alle, bis zu diesem Zeitpunkt durch die Ziffer dargestellten Terme.
+Sie folgt dem oben geschilderten Aufbau.
+Sie wird in der Funktion \texttt{scan} eingesetzt, um den Partner $p$ zu ermitteln.
+
+Zusätzlich gibt es die \texttt{split\_table}, die verschiedene Tabellen enthält.
+Dabei ordnet sie einer Anzahl an Ziffern $N$ eine Tabelle zu, die nur Terme mit dieser Anzahl an Ziffern enthält.
+Beispielhaft sieht die \texttt{split\_table} für $n=1$ und $N=2$ mit Erlauben der Fakultätsfunktion folgendermaßen aus (die Repräsentation als Zeichenkette der Terme ist abgedruckt):
+\begin{lstlisting}[language=Python]
+{
+  1: {
+    1: (1, 1)
+  }, 
+  2: {
+    11: (11, 2),
+    2: ((1+1), 2),
+    0: ((1-1), 2),
+    1: ((1/1), 2)
+  }
+\end{lstlisting}
+
+Die Funktion geht nun nach dem in Abschnitt \ref{sec:idea} geschilderten Verfahren vor.
+Sie variiert insgesamt die Anzahl an Ziffern des 1. Terms, aus der sich die Anzahl an Ziffern des 2. Terms ergibt.
+Im Folgenden iteriert sie durch alle Terme mit den gegebenen Anzahlen an Ziffern (aus \texttt{split\_table}), sodass alle Kombinationen gefunden werden.
+Die Terme werden nun nach ihrer Größe geordnet (für die Division) und mit allen möglichen Rechenarten (falls \texttt{extended} auch mit der Potenzfunktion) verbunden und jeweils mit \texttt{add\_to\_table} der Tabelle hinzugefügt.
+
+Am Ende der Funktion werden alle neuen Terme der neu generierten \texttt{split\_table} der \texttt{aggregated\_table} hinzugefügt.
+
+
+\subsection{Scan}
+\label{sec:implementation:scan}
+Die Funktion \texttt{scan} führt das in Abschnitt \ref{sec:idea:scan} geschilderte Verfahren aus.
+Falls \texttt{extended} \texttt{True} ist, wird auch die Potenzfunktion und die Fakultätsfunktion umgekehrt verwendet.
+Um die Fakultätsfunktion umzukehren, wird das eingangs generierte \texttt{dict} \texttt{FACTORIALS} verwendet, das als Wert die Zahl ausgibt, deren Fakultät den Schlüssel ergibt.
+Alle gefundenen Möglichkeiten werden einem \texttt{set} hinzugefügt.
+Am Ende der Funktion wird die Möglichkeit mit der geringsten Anzahl an Ziffern ausgewählt.
+Falls zwei Möglichkeiten dieselbe Anzahl an Ziffern haben, wird die mit weniger Zeichen gewählt.
+Falls eine Möglichkeit gefunden wurde, wird diese zurückgegeben.
+Ansonsten wird \texttt{None} zurückgegeben.
+
+\subsection{Zusammenfügen}
+Die Funktion \texttt{find\_shortest} fügt nun \texttt{generate\_table} und \texttt{scan} zusammen.
+Nach dem in Anbschnitt \ref{sec:idea} geschilderten Verfahren wird abwechselnd die Tabelle generiert und ein \texttt{Scan} durchgeführt, eine Tabelle mit $m-2$ Ziffern vorliegt, wobei $m$ die Anzahl an Ziffern des gefundenen Terms ist.
+Diese Funktion wird insgesamt zweimal ausgeführt, einmal ohne und einmal mit \texttt{extended}.
+Zusätzlich kann festgelegt werden, ob zusätzliche Informationen ausgegeben werden sollen (\texttt{debug}).
+
+Das Programm benutzt einen \texttt{ArgumentParser}, um die Zahl und die Ziffer aus den Argumenten zu ermitteln, sowie zu überprüfen, ob eine zusätzliche Ausgabe erfolgen soll.
+
+Sobald endgültige Terme im eingeschränkten bzw. erweiterten Modus gefunden wurden, werden diese mit der Anzahl an Stellen ausgegeben.
 
 \subsection{Laufzeitanalyse}
-\todo{hinzufügen}
+Das Element des Programms, welches am längsten benötigt, ist die Generierung der Tabelle.
+Die Zeit, die für diese genötigt wird, verhält sich exponentiell zu der Anzahl der Ziffern, für die die Funktion \texttt{generate} aufgerufen wird.
+Dies lässt sich auf einem Graphen mit logarithmischer y-Skala, der die Generierungszeit der Tabellen gegen die Anzahl der Ziffern, mit der die Funktion aufgerufen wird, abbildet.
+Ein solcher Graph ist beispielhaft für die Ziffer 4 in Abbildung \ref{fig:implementation:runtime:1} zu erkennen.
+
+\begin{figure}
+  \centering
+  \includesvg{diagramm1.svg}
+  \caption{Generierungszeit der Tabellen für die Ziffer 4 nach Anzahl der Ziffern pro Term}
+  \label{fig:implementation:runtime:1}
+\end{figure}
+
+Um die Geschwindigkeit des Ansteigens zu berechnen, führe ich eine lineare Regression des natürlichen Logarithmus der Generierungszeit gegen die Anzahl der Ziffern pro Term für jede Ziffer durch.
+Dabei entspricht die erhaltene Steigung $m$ der Wachstumskonstante $k$ beim exponentiellen Wachstum.
+Die Wachstumskonstante rechne ich nun in den Wachstumsfaktor $a$ um.
+Die Regression führe ich für sämtliche Ziffern je zweimal durch: Einmal ohne und einmal mit Fakultäts- und Potenzfunktion.
+
+\begin{alignat*}{2}
+  & & \ln{t(n)} &= k*n + b \\
+  & & t(n) &= e^b * e^{k*n} = t_0 * e^{k*n} \\
+  &\Leftrightarrow \quad& t(n) &= t_0 * (e^k)^n = t_0 * a^n \\
+  &\Rightarrow \quad& a &= e^k
+\end{alignat*}
+
+Die Wachstumskonstante $a$ stelle ich in einem Säulendiagramm für jede Ziffer dar (siehe Abbildung \ref{fig:implementation:runtime:2}).
+
+\begin{figure}
+  \centering
+  \includesvg{diagramm2.svg}
+  \caption{Wachstumsfaktoren der Generierungszeiten nach Ziffern, ohne und mit Fakultäts- und Potenzfunktion}
+  \label{fig:implementation:runtime:2}
+\end{figure}
+
+Aus beiden Abbildungen zusammen kann erkannt werden, dass die Laufzeit der Tabellengenerierung exponentiell zunimmt, dies aber unterschiedlich schnell geschieht.
+Es können somit nur eine beschränkte Anzahl an Aussagen zur Laufzeit getroffen werden, da sich die Anzahl der benötigten Tabellen je nach Zahl und Ziffer stark unterscheiden können.
+Die Generierung der Tabellen mit Fakultäts- und Potenzfunktion braucht aber immer deutlich länger, vor allem für Ziffern $\ge 3$.
+So braucht die Tabelle mit Termen mit 7 Ziffern für die Ziffer 3 ca. $\frac{13^7}{3.8^7} \approx 5484$ Mal länger, wenn Fakultäts- und Potenzfunktionen miteinbezogen werden.
+Beispielhafte Laufzeiten lassen sich im Abschnitt \ref{sec:examples} erkennen.
 
 \section{Beispiele}
-\todo{hinzufügen}
+\label{sec:examples}
+Für jede Ziffer führe ich das Programm für die Zahlen 2019, 2030, 2080 und 2980 aus.
+\input{../Implementierung/examples.tex}
+
+\subsection{Nicht genügend Parameter}
+Falls dem Programm nicht genügend Parameter übergeben werden, gibt es einen Fehler aus:
+\begin{lstlisting}
+$ python main.py 
+usage: main.py [-h] [--verbose] number digit
+main.py: error: the following arguments are required: number, digit
+\end{lstlisting}
+
+\subsection{Falsche Ziffer}
+Falls der Parameter der Ziffer keine Ziffer ist, gibt das Programm einen Fehler aus:
+\begin{lstlisting}
+$ python main.py 1 -1
+Error: -1 is not a digit, exiting...
+\end{lstlisting}
+
+
+\subsection{Zusätzliche Ausgabe}
+\begin{lstlisting}
+$ python main.py 2019 1 -v
+looking for normal shortest
+generated split table with digits: 1
+generated split table with digits: 2
+generated split table with digits: 3
+generated split table with digits: 4
+generated split table with digits: 5
+generated split table with digits: 6
+generated split table with digits: 7
+generated split table with digits: 8
+found (((1111*(1+1))-1)-((111+(1-11))*(1+1))) with 15 digits, looking if shorter is possible
+generated split table with digits: 9
+found (((111*(1+1))*(11-(1+1)))-((1-11)-11)) with 14 digits, looking if shorter is possible
+generated split table with digits: 10
+found ((((11111-1)/11)*(1+1))-1) with 11 digits, looking if shorter is possible
+
+looking for extended shortest
+generated split table with digits: 1
+generated split table with digits: 2
+generated split table with digits: 3
+generated split table with digits: 4
+generated split table with digits: 5
+generated split table with digits: 6
+found ((((1+1)^11)+1)+(((1+1)+1)*(1-11))) with 11 digits, looking if shorter is possible
+generated split table with digits: 7
+found ((((1+1)^11)+1)-((11-1)*((1+1)+1))) with 11 digits, looking if shorter is possible
+generated split table with digits: 8
+found (((1+1)+1)*(((111+1)*(((1+1)+1)!))+1)) with 11 digits, looking if shorter is possible
+generated split table with digits: 9
+found (((1+1)^11)-(((11-1)*((1+1)+1))-1)) with 11 digits, looking if shorter is possible
+
+normal result ((((11111-1)/11)*(1+1))-1)
+digits: 11
+
+extended result (((1+1)^11)-(((11-1)*((1+1)+1))-1))
+digits: 11
+\end{lstlisting}
 
 \section{Quellcode (ausschnittsweise)}
-\todo{hinzufügen}
+Hier drucke ich die Funktionen \texttt{add\_to\_table}, \texttt{generate}, \texttt{scan} und \texttt{find\_shortest} ab.
+Die Klassendefinitionen für \texttt{Term}, \texttt{Number}, \texttt{UnaryOperation} sowie \texttt{BinaryOperation} werden ausgelassen.
+Ausgelassen wird auch das Einlesen der Parameter und die Ausgabe des durch \texttt{find\_shortest} gefundenen Ergebnisses.
 
-\listoftodos
+\lstinputlisting[language=Python]{code.py}
 
 \end{document}
