@@ -2,7 +2,7 @@ from collections import defaultdict
 from timeit import Timer
 from main import generate
 
-NUM_DIGITS = 10
+NUM_DIGITS = 6
 
 times = defaultdict(dict)
 
@@ -12,7 +12,7 @@ for digit in range(1, 10):
     split_table = defaultdict(dict)
 
     for i in range(1, NUM_DIGITS + 1):
-        timer = Timer('generate(digit, i, aggregated_table, split_table, debug=True)', globals={'aggregated_table': aggregated_table, 'split_table': split_table, 'digit': digit, 'i': i, 'generate': generate})
+        timer = Timer('generate(digit, i, aggregated_table, split_table, True, debug=True)', globals={'aggregated_table': aggregated_table, 'split_table': split_table, 'digit': digit, 'i': i, 'generate': generate})
         times[digit][i] = timer.timeit(1)
 
 for digit in times:
