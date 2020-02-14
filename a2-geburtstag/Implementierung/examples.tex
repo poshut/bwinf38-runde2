@@ -1,0 +1,378 @@
+\subsection{Ziffer 1}
+\subsubsection{2019}
+Der von meinem Programm gefundene Term hat genauso viele Ziffern wie das Beispiel aus der Aufgabenstellung:
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2019 1
+normal result ((((11111-1)/11)*(1+1))-1)
+digits: 11
+
+extended result (((1+1)^11)-(((11-1)*((1+1)+1))-1))
+digits: 11
+0:05.42
+\end{lstlisting}
+\subsubsection{2030}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2030 1
+normal result ((1-11)*(((1+1)*((11-1)-111))-1))
+digits: 12
+
+extended result (((1+1)^11)-((((1+1)+1)!)*((1+1)+1)))
+digits: 10
+0:01.45
+\end{lstlisting}
+\subsubsection{2080}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2080 1
+normal result ((11-1)*(((111-1)*(1+1))-(11+1)))
+digits: 12
+
+extended result (((1+1)^11)+((1+1)^((((1+1)+1)!)-1)))
+digits: 10
+0:01.43
+\end{lstlisting}
+\subsubsection{2980}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2980 1
+normal result ((1-11)*((1+1)+(((1+1)+1)*(11-111))))
+digits: 13
+
+extended result ((((((1+1)+1)!)+1)!)-(((1+1)^11)+(11+1)))
+digits: 11
+0:05.81
+\end{lstlisting}
+\subsection{Ziffer 2}
+\subsubsection{2019}
+Der von meinem Programm gefundene Term hat genauso viele Ziffern wie das Beispiel aus der Aufgabenstellung:
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2019 2
+normal result ((((((22*2)+2)*22)-2)*2)-(2/2))
+digits: 10
+
+extended result ((((22*2)+(2/2))^2)-((2+(2/2))!))
+digits: 9
+0:02.42
+\end{lstlisting}
+\subsubsection{2030}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2030 2
+normal result (2+(((((22*2)+2)*22)+2)*2))
+digits: 9
+
+extended result (((2^(22/2))-22)+(2^2))
+digits: 8
+0:00.54
+\end{lstlisting}
+\subsubsection{2080}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2080 2
+normal result (((22+(2*2))*(2*2))*(22-2))
+digits: 9
+
+extended result (((22-2)*2)*((((2^2)!)+2)*2))
+digits: 8
+0:00.38
+\end{lstlisting}
+\subsubsection{2980}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2980 2
+normal result ((2-((22+2)*((2*(2-22))-22)))*2)
+digits: 11
+
+extended result (((2^(2^(2^2)))+((2^2)!))/22)
+digits: 8
+0:02.97
+\end{lstlisting}
+\subsection{Ziffer 3}
+\subsubsection{2019}
+Der von meinem Programm gefundene Term hat genauso viele Ziffern wie das Beispiel aus der Aufgabenstellung:
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2019 3
+normal result (3+((333+3)*(3+3)))
+digits: 7
+
+extended result ((((3!)^3)*(3!))+(((3!)!)+3))
+digits: 5
+0:00.07
+\end{lstlisting}
+\subsubsection{2030}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2030 3
+normal result (33+((333*(3+3))-(3/3)))
+digits: 9
+
+extended result (((((3!)!)-3)*3)-((((3!)!)+(3!))/(3!)))
+digits: 6
+0:00.22
+\end{lstlisting}
+\subsubsection{2080}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2080 3
+normal result ((3/3)+((33*3)*(((3+3)*3)+3)))
+digits: 9
+
+extended result ((((3!)!)*3)-((((3!)!)/3)/3))
+digits: 5
+0:00.15
+\end{lstlisting}
+\subsubsection{2980}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2980 3
+normal result ((((333*3)-(3+3))*3)+(3/3))
+digits: 9
+
+extended result ((((3!)!)+(3/3))+((((3!)!)+33)*3))
+digits: 7
+0:01.49
+\end{lstlisting}
+\subsection{Ziffer 4}
+\subsubsection{2019}
+Der von meinem Programm gefundene Term hat genauso viele Ziffern wie das Beispiel aus der Aufgabenstellung:
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2019 4
+normal result ((4-(4/4))+((((4*4)*(4*4))-4)*(4+4)))
+digits: 10
+
+extended result ((((4+4)!)/((4!)-4))+(4-(4/4)))
+digits: 7
+0:02.06
+\end{lstlisting}
+\subsubsection{2030}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2030 4
+normal result (((444+((4*4)*4))*4)-((4+4)/4))
+digits: 10
+
+extended result (((((4+4)!)+(4!))+(4^4))/((4!)-4))
+digits: 7
+0:02.09
+\end{lstlisting}
+\subsubsection{2080}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2080 4
+normal result ((((4*4)*(4*4))+4)*(4+4))
+digits: 7
+
+extended result (((4^4)+4)*(4+4))
+digits: 5
+0:00.05
+\end{lstlisting}
+\subsubsection{2980}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2980 4
+normal result (((((4*4)*4)+4)*44)-((4*4)-4))
+digits: 9
+
+extended result ((((((4!)/4)!)+(4!))*4)+4)
+digits: 5
+0:00.26
+\end{lstlisting}
+\subsection{Ziffer 5}
+\subsubsection{2019}
+Der von meinem Programm gefundene Term hat genauso viele Ziffern wie das Beispiel aus der Aufgabenstellung:
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2019 5
+normal result ((((((55+(5*5))*5)+5)*5)-5)-(5/5))
+digits: 10
+
+extended result (((((5!)+5)*((5+5)+5))+(5!))+((5!)/5))
+digits: 8
+0:04.84
+\end{lstlisting}
+\subsubsection{2030}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2030 5
+normal result (5+((((55+(5*5))*5)+5)*5))
+digits: 8
+
+extended result (((5!)+(5*5))*(((5!)/5)-(5+5)))
+digits: 7
+0:00.45
+\end{lstlisting}
+\subsubsection{2080}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2080 5
+normal result ((((5*5)*5)+5)*((55/5)+5))
+digits: 8
+
+extended result ((5^5)-(55*(((5!)/5)-5)))
+digits: 7
+0:00.37
+\end{lstlisting}
+\subsubsection{2980}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2980 5
+normal result ((55*(55-(5/5)))+(5+5))
+digits: 8
+
+extended result (((5^5)-(5!))-(5*5))
+digits: 5
+0:00.07
+\end{lstlisting}
+\subsection{Ziffer 6}
+\subsubsection{2019}
+Der von meinem Programm gefundene Term hat genauso viele Ziffern wie das Beispiel aus der Aufgabenstellung:
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2019 6
+normal result (((((666+6)*6)+6)*6)/(6+6))
+digits: 9
+
+extended result (((6!)+(6!))-(((((6!)+6)+((6!)/6))/6)-(6!)))
+digits: 8
+0:03.06
+\end{lstlisting}
+\subsubsection{2030}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2030 6
+normal result (((6/6)-(6*6))*(((6+6)/6)+(6-66)))
+digits: 10
+
+extended result ((((6^6)+(6!))/(6*6))-(6-(6!)))
+digits: 7
+0:00.78
+\end{lstlisting}
+\subsubsection{2080}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2080 6
+normal result (((6-(6*6))-((6+6)/6))*((6/6)-66))
+digits: 10
+
+extended result ((((6!)+(6!))+(6!))-(((6!)+(6!))/((6+6)+6)))
+digits: 8
+0:03.39
+\end{lstlisting}
+\subsubsection{2980}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2980 6
+normal result (((((6*6)*(6+6))-6)*(6+(6/6)))-((6+6)/6))
+digits: 11
+
+extended result (((((6!)-((6!)/6))/6)-((6!)+(6!)))+((6!)*6))
+digits: 8
+0:05.09
+\end{lstlisting}
+\subsection{Ziffer 7}
+\subsubsection{2019}
+Der von meinem Programm gefundene Term hat genauso viele Ziffern wie das Beispiel aus der Aufgabenstellung:
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2019 7
+normal result (((77-7)/7)-(7*(7+(7*(7-(7*7))))))
+digits: 10
+
+extended result (((((7!)+(7!))*((7!)+7))+(7!))/(((7!)*7)-((7!)+(7!))))
+digits: 9
+0:36.72
+\end{lstlisting}
+\subsubsection{2030}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2030 7
+normal result (((7-(7*(7-(7*7))))*7)-77)
+digits: 8
+
+extended result (7*(((7!)/(7+7))+(7-77)))
+digits: 7
+0:04.35
+\end{lstlisting}
+\subsubsection{2080}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2080 7
+normal result ((7-(77*(7-((7+7)*(7+7)))))/7)
+digits: 9
+
+extended result ((((((7*7)+7)*7)+7)*7)-(((7!)/7)-7))
+digits: 9
+0:31.23
+\end{lstlisting}
+\subsubsection{2980}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2980 7
+normal result ((((77+7)*7)+(7+(7/7)))*(7-((7+7)/7)))
+digits: 11
+
+extended result (((7!)-((7+7)/7))-((7*7)*((7*7)-7)))
+digits: 9
+0:33.10
+\end{lstlisting}
+\subsection{Ziffer 8}
+\subsubsection{2019}
+Der von meinem Programm gefundene Term hat genauso viele Ziffern wie das Beispiel aus der Aufgabenstellung:
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2019 8
+normal result ((88+(88/8))-(((8+8)+8)*(8-88)))
+digits: 11
+
+extended result (((((((8!)+(8!))+(8!))/8)+8)/8)+((8+8)*8))
+digits: 9
+0:31.39
+\end{lstlisting}
+\subsubsection{2030}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2030 8
+normal result (((8+8)/8)*(((8*8)*(8+8))-(8+(8/8))))
+digits: 10
+
+extended result ((((8!)/8)/8)-(8-(88*(8+8))))
+digits: 8
+0:03.18
+\end{lstlisting}
+\subsubsection{2080}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2080 8
+normal result (((((8*8)*8)+8)*(8*8))/(8+8))
+digits: 8
+
+extended result (((888*8)+8)+(8-((8!)/8)))
+digits: 8
+0:02.60
+\end{lstlisting}
+\subsubsection{2980}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2980 8
+normal result (((((8*8)*8)*((8*8)*8))+(88+8))/88)
+digits: 11
+
+extended result ((8/8)+((((8^8)/(8*8))+8)/88))
+digits: 9
+0:30.48
+\end{lstlisting}
+\subsection{Ziffer 9}
+\subsubsection{2019}
+Der von meinem Programm gefundene Term hat genauso viele Ziffern wie das Beispiel aus der Aufgabenstellung:
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2019 9
+normal result (9+(((999*(9+9))+(99+9))/9))
+digits: 10
+
+extended result (99-((9!)/((9-99)-99)))
+digits: 8
+0:04.34
+\end{lstlisting}
+\subsubsection{2030}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2030 9
+normal result (((9+9)+(99/9))*((9*9)-(99/9)))
+digits: 10
+
+extended result ((((9+9)/9)^(99/9))-(9+9))
+digits: 8
+0:02.57
+\end{lstlisting}
+\subsubsection{2080}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2080 9
+normal result ((((9+9)+9)-(9/9))*((9*9)-(9/9)))
+digits: 9
+
+extended result (((9*9)*(9*9))-((((9!)/9)+9)/9))
+digits: 8
+0:02.11
+\end{lstlisting}
+\subsubsection{2980}
+\begin{lstlisting}
+$ command time 'time: %E' python main.py 2980 9
+normal result ((((((9+9)*(9+9))+9)*9)+(9/9))-(9+9))
+digits: 10
+
+extended result (((((9!)/(9+9))+99)/9)+((9*9)*9))
+digits: 9
+0:21.87
+\end{lstlisting}
