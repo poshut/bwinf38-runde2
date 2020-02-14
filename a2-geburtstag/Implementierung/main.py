@@ -17,6 +17,10 @@ while len(str(_fac)) <= MAX_DIGITS:
 MAX_FACTORIAL = _i -1
 
 class Term(object):
+    """
+    Repräsentiert einen generischen Term.
+    Spezifische Terme vererben von dieser Klasse.
+    """
 
     def __init__(self):
        pass 
@@ -35,6 +39,9 @@ class Term(object):
 
 
 class Number(Term):
+    """
+    Repräsentiert eine Zahl.
+    """
 
     def __init__(self, val):
         self.val = val
@@ -49,6 +56,9 @@ class Number(Term):
         return str(self.val)
 
 class UnaryOperation(Term):
+    """
+    Repräsentiert eine unäre Operation zwischen zwei Termen, d.h. die Fakultätsfunktion.
+    """
     OP_FAC = 0
     OPERATIONS = [OP_FAC]
 
@@ -70,6 +80,9 @@ class UnaryOperation(Term):
 
 
 class BinaryOperation(Term):
+    """
+    Repräsentiert eine binäre Operation zwischen zwei Termen.
+    """
 
     OP_ADD = 0
     OP_SUB = 1
@@ -123,6 +136,10 @@ class BinaryOperation(Term):
         
 
 def add_to_table(term, table, extended=False):
+    """
+    Fügt den gegebenen Term der gegebenen Tabelle hinzu.
+    Wenn extended wahr, wird auch die Fakulätsfunktion gebildet und der Tabelle hinzugefügt.
+    """
     val = term.value()
     if extended and val >= 3 and val <= MAX_FACTORIAL:
         add_to_table(UnaryOperation(term, UnaryOperation.OP_FAC), table, extended=extended)
@@ -133,6 +150,11 @@ def add_to_table(term, table, extended=False):
 
 
 def generate(digit, num_digits, aggregated_table, split_table, extended, debug=False):
+    """
+    Erweitert die Tabelle und fügt alle Terme mit der gegebenen Anzahl an Ziffern hinzu.
+    Falls extended, werden auch Fakultäts- und Potenzfunktionen gebildet.
+    Falls debug, werden zusätzliche Informationen ausgegeben.
+    """
 
     current_split_table = split_table[num_digits]        
 
@@ -183,6 +205,10 @@ def generate(digit, num_digits, aggregated_table, split_table, extended, debug=F
     return aggregated_table, split_table
 
 def scan(number, digit, aggregated_table, extended):
+    """
+    Sucht für jeden Term der Tabelle nach einem Partner, mit dem zusammen durch eine Rechenoperation die gegebene Zahl number erhalten wird.
+    Falls extended, werden auch Fakultäts- und Potenzfunktionen benutzt.
+    """
     results = set()
     if number in aggregated_table:
         results.add(aggregated_table[number][0])
@@ -218,7 +244,7 @@ def scan(number, digit, aggregated_table, extended):
                 results.add(BinaryOperation(aggregated_table[j][0], aggregated_table[res][0], BinaryOperation.OP_POW))
         
 
-    if extended and j >= 3 and j <= 60 and j in FACTORIALS:
+    if extended and j >= 3 and j <= 60 and j in FACTORIALS and FACTORIALS[j] in aggregated_table:
         results.add(UnaryOperation(aggregated_table[FACTORIALS[j]][0], UnaryOperation.OP_FAC))
         
 
@@ -239,6 +265,11 @@ def scan(number, digit, aggregated_table, extended):
     return res
 
 def find_shortest(number, digit, extended, debug=False):
+    """
+    Findet den kürzesten Term, der die Zahl number nur durch die Ziffer digit repräsentiert.
+    Sucht für jeden Term der Tabelle nach einem Partner, mit dem zusammen durch eine Rechenoperation die gegebene Zahl number erhalten wird.
+    Falls extended, werden auch Fakultäts- und Potenzfunktionen benutzt.
+    """
     aggregated_table = {}
     split_table = defaultdict(dict)
 
