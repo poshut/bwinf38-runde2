@@ -90,21 +90,27 @@
 \section{Lösungsidee}
 \label{sec:idea}
 \subsection{Generierung der Tabelle}
+\label{sec:idea:generate}
 Meine Lösungsidee für das Problem besteht darin, alle möglichen Terme, die durch die gegebenen Rechenoperationen aus der gegebenen Ziffer erhalten werden können, in einer Tabelle zu speichern.
 Dabei wird nach der Anzahl der vorkommenden Ziffern verfahren:
 Angefangen wird bei $n=1$ Ziffern.
 Für $n=1$ Ziffern lässt sich ohne Berücksichtigung der Fakultätsfunktion nur ein Term finden, nämlich die Ziffer selbst.
-Für $n=[2, \infty)$ Ziffern werden Terme mit einer geringeren Anzahlen an Ziffern $i,j$ über die gegebenen Grundrechenarten kombiniert, sodass $n=i+j$.
-Dabei sollen die Terme bei den kommutativen Grundrechenarten ($+$, $*$) nicht vertauscht werden, da dort dasselbe Ergebnis entsteht, bei den nicht-kommutativen Grundrechenarten jedoch schon, da oft verschiedene Ergebnisse auftreten.
+Für $ n \geq 2$ Ziffern werden Terme mit einer geringeren Anzahlen an Ziffern $i,j$ über die gegebenen Grundrechenarten kombiniert, sodass $n=i+j$.
+Dies funktioniert, da durch bei der Kombination zweier Terme keine neue Ziffer verwendet werden muss.
+Bei der Kombination sollen so wenig Möglichkeiten, wie für die Vollständigkeit nötig, ausprobiert werden: die Terme werden bei den kommutativen Grundrechenarten ($+$, $*$) beispielsweise nicht vertauscht, da dort dasselbe Ergebnis entsteht, bei den nicht-kommutativen Grundrechenarten jedoch schon, da oft verschiedene Ergebnisse auftreten.
 
 Um beispielsweise alle Terme für $n=5$ zu finden, werden alle Terme mit $i=1$ und $j=4$ und mit $i=2$ und $j=3$ über das kartesische Produkt kombiniert und für alle Rechenarten und Reihenfolgen gespeichert.
 
 Es gibt vier Grundrechenarten, von denen zwei nicht-kommutativ sind.
-Dadurch ergeben sich sechs mögliche neue Terme durch jedes Termpaar, davon ausgehend, dass keine Dopplungen auftreten und alle Terme valide sind (z.B. keine Division durch 0):
+Man kann für die Abschätzung der Anzahl der Ergebnisse jedoch auch die Operation der Division als kommutativ betrachten, da für $a,b \in \mathbb{Z}, a \neq b$ nur $\frac{a}{b} \in \mathbb{Z}$ oder (exklusiv) $\frac{b}{a} \in \mathbb{Z}$.
+Für $a = b$ ist jedoch $\frac{a}{b} = \frac{b}{a}$, sodass die Division auch in diesem Fall als kommutativ betrachtet werden kann.
+Dadurch ergeben sich fünf mögliche neue Terme durch jedes Termpaar, davon ausgehend, dass keine Dopplungen auftreten und alle Terme valide sind (z.B. keine Division durch 0).
+Zusätzlich ergibt sich für jedes $n$ ein neuer Term, der aus $n$-Mal der Ziffer besteht, z.B. 555555.
+$N(n)$ steht dabei für die Anzahl an Termen mit $n$ Ziffern:
 
 \begin{align*}
 N(1) &= 1 \\
-N(n) &= \sum_{i=1}^{n // 2}6i(n-i) \\
+N(n) &= \sum_{i=1}^{\left \lfloor \dfrac{n}{2} \right \rfloor}5*N(i)*N(n-i)+1 \\
 \end{align*}
 
 Es ergeben sich die $N$, die in Abbildung \ref{fig:anzahl-terme} zu sehen sind.
@@ -115,49 +121,73 @@ Es ergeben sich die $N$, die in Abbildung \ref{fig:anzahl-terme} zu sehen sind.
   $n$ & $N(n)$ \\ \hline
   1 & 1 \\ \hline
   2 & 6 \\ \hline
-  3 & 36 \\ \hline
-  4 & 432 \\ \hline
-  5 & 3.888 \\ \hline
-  6 & 46.656 \\ \hline
-  7 & 513.216 \\ \hline
-  8 & 6.718.464 \\ \hline
-  9 & 78.941.952 \\ \hline
-  10 & 1.038.002.688 \\ \hline
-  11 & 12.939.761.664 \\ \hline
-  12 & 174.505.383.936 \\ 
+  3 & 31 \\ \hline
+  4 & 337 \\ \hline
+  5 & 2.617 \\ \hline
+  6 & 28.003 \\ \hline
+  7 & 270.763 \\ \hline
+  8 & 3.167.389 \\ \hline
+  9 & 32.709.949 \\ \hline
+  10 & 381.968.185 \\ \hline
+  11 & 4.204.739.605 \\ \hline
+  12 & 50.353.610.041 \\ \hline
+  13 & 571.587.737.611 \\ \hline
+  14 & 6.901.952.684.137 \\ \hline
+  15 & 80.413.187.288.797
   \end{tabular}
-  \caption{Anzahl der möglichen Terme $N$ nach der Anzahl der vorkommenden Ziffern $n$}
+  \caption{Anzahl der möglichen Terme $N$ nach der Anzahl der vorkommenden Ziffern $n$, Worst-Case}
   \label{fig:anzahl-terme}
 \end{figure}
+
+Es ist zu erkennen, dass die Anzahl an möglichen Termen in dieser Abschätzung etwa um den Faktor 10 jeden Schritt wächst.
+Man muss jedoch auch sagen, dass in dieser Abschätzung Duplikate, also Zahlen, für die ein Term bereits bekannt ist, bereits eingeschlossen ist.
+Für diese wird zumindest Zeit aufgewendet, sie tragen in den folgenden Iterationen jedoch nicht zum Wachstum bei.
+Insgesamt wächst die Berechnungszeit und die für die Tabelle benötigte Speicherplatz somit exponentiell.
+
+Eine Maßnahme, um den Algorithmus schneller zu gestalten, wäre, große Tabellen zu berechnen und diese auf der Festplatte zu speichern.
+Da es bei dieser Aufgabe jedoch um das effiziente Verfahren geht, verfolge ich diesen Schritt nicht weiter in meiner Lösung.
+
+Aus der Aufgabe geht nicht klar hervor, ob das unäre Minus (z.B. in $-5$) verwendet werden darf.
+Da das Programm mit weniger implementierten Operationen schneller abläuft, habe ich es nicht implementiert, es würde jedoch eine sinnvolle Erweiterung des Problems darstellen.
 
 \subsection{Scannen}
 \label{sec:idea:scan}
 Um die Laufzeit des Programms zu verbessern, wartet der Algorithmus nicht darauf, bis die Zahl in der Tabelle auftaucht, sondern überprüft, ob man zwei Terme aus der Tabelle durch eine Grundrechenart kombinieren kann, um auf das gewünschte Ergebnis zu kommen.
 Dieses Verfahren nenne ich \textit{Scan}.
-Dazu wird für jede Zahl $j$, für die ein Term in der Tabelle steht, ein Partner $p$ berechnet, mit dem das gewünschte Ergebnis $e$ erhalten werden kann.
+Dazu wird für jede Zahl $k$, für die ein Term in der Tabelle steht, ein Partner $p$ berechnet, mit dem das gewünschte Ergebnis $e$ erhalten werden kann.
 Dafür gibt es verschiedene Möglichkeiten:
 
 \begin{alignat*}{3}
-  e &= j + p \quad &\Leftrightarrow& \quad p = e - j \\
-  e &= j - p \quad &\Leftrightarrow& \quad p = j - e \\
-  e &= p - j \quad &\Leftrightarrow& \quad p = j + e \\
-  e &= p * j \quad &\Leftrightarrow& \quad p = \frac{e}{j} \\
-  e &= p / j \quad &\Leftrightarrow& \quad p = e * j \\
-  e &= j / p \quad &\Leftrightarrow& \quad p = \frac{j}{e}
+  e &= j + p \quad &\Leftrightarrow& \quad p = e - k \\
+  e &= j - p \quad &\Leftrightarrow& \quad p = k - e \\
+  e &= p - j \quad &\Leftrightarrow& \quad p = k + e \\
+  e &= p * j \quad &\Leftrightarrow& \quad p = \frac{e}{k} \\
+  e &= p / j \quad &\Leftrightarrow& \quad p = e * k \\
+  e &= j / p \quad &\Leftrightarrow& \quad p = \frac{k}{e}
 \end{alignat*}
 
-Für jedes $j$ werden nun alle möglichen Partner $p$ und es wird geschaut, ob $p$ Teil der Tabelle ist.
+Für jedes $k$ werden nun alle möglichen Partner $p$ und es wird geschaut, ob $p$ Teil der Tabelle ist.
+Zusätzlich überprüft der Scan, ob $e$ an sich in der Tabelle enthalten ist.
 Ist dies der Fall, wird es einer Menge hinzugefügt.
 Der Term mit der geringsten Anzahl an Ziffern der Menge ist ein mögliches Ergebnis.
+Der \textit{Scan} hat den Vorteil, dass er im Gegensatz zur Generierung der Tabelle ein linearer Schritt ist.
+Wird die Tabelle als Datensruktur mit Zugriffszeit $\mathcal{O}(1)$ implementiert, werden für jedes $k$ maximal 6 Tabellenzugriffe durchgeführt. 
+Für hohe $n$ ist ein Scan also deutlich schneller, als die Generierung einer neuen Tabelle.
 
 \subsection{Zusammenfügen}
 Es wird immer abwechselnd eine Tabelle mit einer Ziffer mehr als zuvor generiert und ein \textit{Scan} ausgeführt.
 Dies wird solange wiederholt, bis ein Scan ein Ergebnis mit $m$ Ziffern zurückgibt und eine Tabelle mit $m-2$ Ziffern vorliegt und ein Scan ausgeführt wurde.
 
-An diesem Punkt wird die beste Lösung verwendet, da eine Lösung mit $n=m-2$ Ziffern in der Tabelle stehen würde, der Scan eine Lösung mit $n=m-1$ Ziffern erkannt hätte und eine Lösung mit $n=m$ Ziffern bereits vorliegt.
+An diesem Punkt wird die Lösung mit $m$ Ziffern verwendet, da eine Lösung mit $n=m-2$ Ziffern in der Tabelle stehen würde, der Scan eine Lösung mit $n=m-1$ Ziffern erkannt hätte (es müssen sowohl $p$ als auch $k$ bereits in der Tabelle vorhanden sein) und eine Lösung mit $n=m$ Ziffern bereits vorliegt.
 
 Der Algorithmus kann nicht schon bei der Tabelle mit $m-3$ Ziffern terminieren, da eine Lösung, die sich aus Termen mit einer Ziffer und $m-2$ Ziffern zusammensetzt, durch einen \textit{Scan} nicht erkannt werden würde, sodass der Algorithmus nicht die beste Lösung liefern würde.
 Algorithmus \ref{alg:combination} zeight die Kombination der Tabellengeneration und des Scans.
+
+Eine Ausnahme stellen Zahlen da, die nur aus der gegebenen Ziffer oder dem Ergebnis ihrer Fakultätsfunktion dargestellt werden kann.
+Da dem Scan nicht die Tabelle für $m-1$ Ziffern vorliegt, erkennt er nicht, ob die Zahl aus $m-1$ mal der gegebenen Ziffer oder ihrer Fakultätsfunktion gebildert werden kann.
+In diesem Fall würde der Scan einen zu langen Term zurückgeben.
+Um dagegen vorzugehen, muss im Schritt der Generierung aller Terme mit $n$ Ziffern bereits die Zahl mit $n+1$ mal der gegebenen Ziffern, sowie aller ihrer Fakultätsfunktionsergebnisse den ensprechenden Tabellen hinzugefügt werden.
+So erkennt der anschließende Scan auch, ob es nicht zusammengesetzte Terme aus $m-1$ Ziffern gibt, die den Wert von $e$ annehmen.
 
 
 \begin{algorithm}
@@ -190,17 +220,17 @@ Für die maximale Länge des Ergebnisses wähle ich 100 Stellen, da auch wissens
 
 \begin{align*}
   N &= a^b \\
-  \Rightarrow \quad \mathrm{len}(N) &= \log_{10}a^b \\
-  \Leftrightarrow \quad \mathrm{len}(N) &= b * \log_{10}a
+  \Rightarrow \quad \mathrm{len}(N) &= \left \lfloor \log_{10}a^b \right \rfloor + 1\\
+  \Leftrightarrow \quad \mathrm{len}(N) &= \left \lfloor b * \log_{10}a \right \rfloor + 1
 \end{align*}
 
-Da das Potenzieren eine nicht-kommutative binäre Operation ist, ähnelt sie den Grundrechenarten und kann in der Generierung der Tabelle hinzugefügt werden, sodass für jede Kombination zweier Terme der Tabelle 8 neue Terme hinzugefügt werden.
+Da das Potenzieren eine nicht-kommutative binäre Operation ist, ähnelt sie den Grundrechenarten und kann in der Generierung der Tabelle hinzugefügt werden, sodass für jede Kombination zweier Terme der Tabelle 7 neue Terme hinzugefügt werden.
 
-Dem \textit{Scan} wird auch zwei Prüfungen hinzugefügt, ob sich das Ergebnis $e$ durch einen Term der Tabelle $j$ und seinen Partner $p$ darstellen lassen:
+Dem \textit{Scan} werden auch zwei Prüfungen hinzugefügt, ob sich das Ergebnis $e$ durch einen Term der Tabelle $k$ und seinen Partner $p$ darstellen lassen:
 
 \begin{alignat*}{3}
-  e &= p ^ j \quad &\Leftrightarrow& \quad p = e ^ {\frac{1}{j}} \\
-  e &= j ^ p \quad &\Leftrightarrow& \quad p = \log_j e
+  e &= p ^ k \quad &\Leftrightarrow& \quad p = e ^ {\frac{1}{k}} \\
+  e &= k ^ p \quad &\Leftrightarrow& \quad p = \log_k e
 \end{alignat*}
 
 \subsubsection{Fakultätsfunktion}
@@ -256,7 +286,7 @@ Ihre Textrepräsentation ist die Zahl als \texttt{str}.
 
 Die zweite Möglichkeit eines Terms ist eine unäre Operation, d.h. eine Operation, die auf einem Term operiert.
 Im Fall der Aufgabenstellung ist dies nur die Fakultätsfunktion.
-Die Klasse heißt \texttt{UnaryOperation} und erhält in ihrem Konstruktor den Term und die entsprechende Operation (nur \texttt{O\_FAC} erlaubt).
+Die Klasse heißt \texttt{UnaryOperation} und erhält in ihrem Konstruktor den Term und die entsprechende Operation (nur \texttt{OP\_FAC} erlaubt).
 Die Berechnung erfolgt, indem die Fakultätsfunktion für den Wert des inneren Terms berechnet wird.
 Als Text wird die unäre Operation repräsentiert, indem der Term, gefolgt von einem \textit{!} in Klammern gesetzt wird.
 
@@ -313,6 +343,7 @@ Beispielhaft sieht die \texttt{split\_table} für $n=1$ und $N=2$ mit Erlauben d
     0: ((1-1), 2),
     1: ((1/1), 2)
   }
+}
 \end{lstlisting}
 
 Die Funktion geht nun nach dem in Abschnitt \ref{sec:idea} geschilderten Verfahren vor.
@@ -382,11 +413,14 @@ Aus beiden Abbildungen zusammen kann erkannt werden, dass die Laufzeit der Tabel
 Es können somit nur eine beschränkte Anzahl an Aussagen zur Laufzeit getroffen werden, da sich die Anzahl der benötigten Tabellen je nach Zahl und Ziffer stark unterscheiden können.
 Die Generierung der Tabellen mit Fakultäts- und Potenzfunktion braucht aber immer deutlich länger, vor allem für Ziffern $\ge 3$.
 So braucht die Tabelle mit Termen mit 7 Ziffern für die Ziffer 3 ca. $\frac{13^7}{3.8^7} \approx 5484$ Mal länger, wenn Fakultäts- und Potenzfunktionen miteinbezogen werden.
+Insgesamt kann man aber auch erkennen, dass ohne Faktuläts- und Potenzfunktionen der Wachstumsfaktor der Generierungszeiten deutlich unter den abgeschätzten 10 (siehe \ref{sec:idea:generate}) liegt. 
+Dies zeigt, dass ein großer Teil der generierten Terme nicht valide oder Duplikate sind und daher vermieden werden können.
 Beispielhafte Laufzeiten lassen sich im Abschnitt \ref{sec:examples} erkennen.
 
 \section{Beispiele}
 \label{sec:examples}
 Für jede Ziffer führe ich das Programm für die Zahlen 2019, 2030, 2080 und 2980 aus.
+Jedes Beispiel rufe ich unter Linux mit dem Programm \texttt{time} auf, das am Ende die Zeit ausgibt, die das Programm gebraucht hat.
 \input{../Implementierung/examples.tex}
 
 \subsection{Nicht genügend Parameter}

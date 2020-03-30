@@ -1,4 +1,8 @@
 def add_to_table(term, table, extended=False):
+    """
+    Fügt den gegebenen Term der gegebenen Tabelle hinzu.
+    Wenn extended wahr, wird auch die Fakulätsfunktion gebildet und der Tabelle hinzugefügt.
+    """
     val = term.value()
     if extended and val >= 3 and val <= MAX_FACTORIAL:
         add_to_table(UnaryOperation(term, UnaryOperation.OP_FAC), table, extended=extended)
@@ -9,12 +13,15 @@ def add_to_table(term, table, extended=False):
 
 
 def generate(digit, num_digits, aggregated_table, split_table, extended, debug=False):
+    """
+    Erweitert die Tabelle und fügt alle Terme mit der gegebenen Anzahl an Ziffern hinzu.
+    Falls extended, werden auch Fakultäts- und Potenzfunktionen gebildet.
+    Falls debug, werden zusätzliche Informationen ausgegeben.
+    """
 
     current_split_table = split_table[num_digits]        
+    next_split_table = split_table[num_digits+1]
 
-    # Add 3, 33, 333 etc
-    num = int(str(digit)*num_digits)
-    add_to_table(Number(num), current_split_table, extended)
     swap = False
 
     for op1_num_digits in range(1, num_digits // 2 + 1):
@@ -35,9 +42,9 @@ def generate(digit, num_digits, aggregated_table, split_table, extended, debug=F
                 add_to_table(BinaryOperation(op2_v, op1_v, BinaryOperation.OP_SUB), current_split_table, extended)
                 add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_MULT), current_split_table, extended)
                 if extended and op1_k >= 2 and op2_k >= 2:
-                    if op2_k * math.log(op1_k, 10) <= MAX_DIGITS:
+                    if math.floor(op2_k * math.log(op1_k, 10)) + 1 <= MAX_DIGITS:
                         add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_POW), current_split_table, extended)
-                    if op1_k * math.log(op2_k, 10) <= MAX_DIGITS:
+                    if math.floor(op1_k * math.log(op2_k, 10)) + 1 <= MAX_DIGITS:
                         add_to_table(BinaryOperation(op2_v, op1_v, BinaryOperation.OP_POW), current_split_table, extended)
 
                 if op2_k != 0:
@@ -56,9 +63,20 @@ def generate(digit, num_digits, aggregated_table, split_table, extended, debug=F
     for k in split_table[num_digits]:
         if k not in aggregated_table:
             aggregated_table[k] = split_table[num_digits][k]
+
+    # Add 3, 33, 333 etc. Scan mit m Ziffern erwartet, dass die Zahl, die m+1 mal die Ziffer enthält, bereits eingetragen ist.
+    num = int(str(digit)*(num_digits+1))
+    add_to_table(Number(num), next_split_table, extended)
+    add_to_table(Number(num), aggregated_table, extended)
+
+
     return aggregated_table, split_table
 
 def scan(number, digit, aggregated_table, extended):
+    """
+    Sucht für jeden Term der Tabelle nach einem Partner, mit dem zusammen durch eine Rechenoperation die gegebene Zahl number erhalten wird.
+    Falls extended, werden auch Fakultäts- und Potenzfunktionen benutzt.
+    """
     results = set()
     if number in aggregated_table:
         results.add(aggregated_table[number][0])
@@ -115,10 +133,16 @@ def scan(number, digit, aggregated_table, extended):
     return res
 
 def find_shortest(number, digit, extended, debug=False):
+    """
+    Findet den kürzesten Term, der die Zahl number nur durch die Ziffer digit repräsentiert.
+    Sucht für jeden Term der Tabelle nach einem Partner, mit dem zusammen durch eine Rechenoperation die gegebene Zahl number erhalten wird.
+    Falls extended, werden auch Fakultäts- und Potenzfunktionen benutzt.
+    """
     aggregated_table = {}
     split_table = defaultdict(dict)
 
-    i = 1
+    # Bei 0 beginnen, dass generate() die Ziffer als Zahl der Tabelle hinzufügt
+    i = 0
     res_n = math.inf
 
     # Generate tables until shortest result will be available with scan()
