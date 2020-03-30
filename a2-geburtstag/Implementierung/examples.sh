@@ -1,5 +1,4 @@
 rm examples.tex
-TIME="%E"
 
 for i in {1..9}; do
     echo "\\subsection{Ziffer $i}" >> examples.tex
@@ -10,8 +9,8 @@ for i in {1..9}; do
             echo "Der von meinem Programm gefundene Term hat genauso viele Ziffern wie das Beispiel aus der Aufgabenstellung:" >> examples.tex
         fi
         echo "\\begin{lstlisting}" >> examples.tex
-        echo "\$ command time 'time: %E' python main.py $j $i" >> examples.tex
-        { command time -f "%E" python main.py $j $i ; } >> examples.tex 2>&1
+        echo "\$ command time -f 'Zeit: %E' python main.py $j $i" >> examples.tex
+        { command time -f "Zeit: %E" python main.py $j $i ; } >> examples.tex 2>&1
         echo "\\end{lstlisting}" >> examples.tex
     done
 done
