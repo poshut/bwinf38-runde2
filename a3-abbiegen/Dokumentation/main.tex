@@ -96,10 +96,12 @@ Daraufhin arbeite ich mit einer modifizierten Version des Dijkstra-Shortest-Path
 
 \subsection{Darstellung des Straßennetzes}
 \label{sec:idea:representation}
-Straßennetze werden allgemein als gewichtete Graphen, d.h. Mengen von Knoten und Kanten zwischen diesen, repräsentiert.
-Normalerweise entsprechen dabei Knoten den Kreuzungen und Kanten den Straßen zwischen den Kreuzungen, ein sog. \textit{node-based-graph}.
-Dabei hat jede Kante ein Gewicht, d.h. einen ihr zugewiesenen numerischen Wert, der meistens der Länge der entsprechenden Straße entspricht.
-Das Beispiel aus der Aufgabenstellung ist in Abbildung \ref{fig:graph-idee} als \textit{node-based-graph} repräsentiert.
+Straßennetze werden allgemein als gewichtete Graphen, d.h. Mengen von Knoten und Kanten repräsentiert.
+Grafisch wird ein Knoten dabei das Punkt oder Kreis repräsentiert, eine Kante als Linie zwischen zwei Knoten. 
+Normalerweise entsprechen dabei Knoten den Kreuzungen und Kanten den Straßen zwischen den Kreuzungen, ein sog. \textit{node-based-graph} \cite{geisberger}.
+Dabei hat jede Kante ein Gewicht, d.h. einen ihr zugewiesenen numerischen Wert, der meistens dem Zeit entspricht, der für das Befahren aufgewendet wird.
+In einfachen Szenarien, in denen die Geschwindigkeit auf allen Straßen als konstant angenommen wird, wird oft die Länge der entsprechenden Straße als Gewicht verwendet, wie es in dieser Aufgabe der Fall ist.
+Das Beispiel aus der Aufgabenstellung ist in Abbildung \ref{fig:graph-idee} als \textit{node-based-graph} repräsentiert (ohne Gewichte).
 
 \begin{figure}
 \centering
@@ -192,25 +194,31 @@ Das Beispiel aus der Aufgabe ist in Abbildung \ref{fig:edge-based-graph} als \te
 \end{figure}
 
 \subsection{Finden des optimalen Weges}
-Das Finden des optimalen Weges löse ich mithilfe des Dijkstra-Shortest-Path-Algorithmus.
+Das Finden des optimalen Weges löse ich mithilfe einer modifizierten Version des Dijkstra-Shortest-Path-Algorithmus.
 Dieser benutzt eine \textsc{PriorityQueue}, um Kreuzungen geordnet nach ihrer Distanz zum Ausgangspunkt zu \enquote{besuchen}.
-Wird eine Kreuzung "besucht", werden alle Kreuzungen, die von dieser Kreuzung über eine Straße erreicht werden können, der \textsc{PriorityQueue} mit ihrer Distanz vom Ursprung hinzugefügt.
-Wird die Zielkreuzung gefunden, terminiert der Algorithmus und der kürzeste Weg kann rekonstruiert werden.
+Wird eine Straße "besucht", werden alle Straßen, auf die man ausgehend von dieser Straße gelangen kann, der \textsc{PriorityQueue} mit ihrer Distanz vom Ursprung hinzugefügt.
+Dabei wird die Distanz vom Ursprung einer Straße aus der Distanz vom Ursprung der gerade besuchten Straße plus die Länge der nächsten Straße berechnet.
+Wird eine Straße besucht, die an die Zielkreuzung angrenzt, terminiert der Algorithmus und der kürzeste Weg kann rekonstruiert werden.
+Durch die Verwendung des \textit{edge-based-graph} kann neben der Distanz vom Urspung jeweils auch die Anzahl an Abbiegevorgängen der \textsc{PriorityQueue} hinzugefügt werden.
+So kann für jede besuchte Straße auch die Anzahl an Abbiegevorgängen bestimmt werden, die man braucht, um auf sie zu gelangen.
+Die bereits besuchten Straßen werden einer Menge hinzugefügt.
+Eine Straße wird nicht besucht, falls sie bereits besucht wurde.
 
-Der erste Schritt meines Programms ist es, den Dijkstra-Shortest-Path-Algorithmus auf den in Abschnitt \ref{sec:idea:representation} beschriebenen \textit{edge-based-graph} anzuwenden.
-Dadurch wird die kürzeste Distanz vom Start zum Ziel ermittelt.
-Zusätzlich kann jeweils die Anzahl an Abbiegevorgängen neben der Distanz in die \textsc{PriorityQueue} hinzugefügt werden, damit auch die maximale Anzahl an Abbiegevorgängen $n$ ermittelt werden kann.
+Der erste Schritt meines Programms ist es, den Dijkstra-Shortest-Path-Algorithmus wie oben beschrieben auf den \textit{edge-based-graph} anzuwenden.
+Dadurch wird die kürzeste mögliche Distanz und die entsprechende Anzahl an Abbiegevorgängen vom Start zum Ziel $n$ ermittelt.
 
 Im Folgenden soll nun versucht werden, den kürzesten Weg mit einer gewissen Anzahl an Abbiegevorgängen $m$ zu finden.
 Anfangs ist $m = n - 1$, falls ein solcher Weg existiert und Bilals Toleranz nicht überschreitet, wird $m$ um jeweils 1 verringert, bis eine der Bedingungen verletzt ist.
 Dadurch wird der Weg mit der niedrigsten Anzahl an Abbiegevorgängen, der Bilals Anforderungen genügt, gefunden.
 
 Wie auch anfangs, verfolgt die modifizierte Version des Dijkstra-Algorithmus die Anzahl der Abbiegevorgänge, die benötigt werden, um auf eine Straße (zu einem Knoten) zu gelangen.
-Anders als zuvor fügt jedoch der Algorithmus der \textsc{PriorityQueue} keine Straßen hinzu, für die $>m$ Mal abgebogen werden muss.
+Anders als zuvor fügt jedoch der Algorithmus der \textsc{PriorityQueue} keine Straßen hinzu, für die $k>m$ Mal abgebogen werden muss.
 Zusätzlich wird es erlaubt, Knoten öfter zu besuchen, sofern bei den neuen Besuchen die Zahl der Abbiegevorgänge auf der Route geringer ist, als vorher.
+Dazu wird die oben beschriebene Menge so abgeändert, dass sie zusätzlich zur Straße die Anzahl an Abbiegevorgängen speichert.
 
 Somit werden nur Routen gefunden, die maximal $m$ Abbiegevorgänge haben.
 Auch werden keine Routen ignoriert, die zwar etwas länger sind, aber trotzdem die entsprechende Anzahl an Abbiegevorgängen aufweisen könnten.
+Von allen Routen, die $k$ Abbiegevorgänge haben, ist die Resultierende aufgrund des Dijkstra-Shortest-Path-Algorithmus auch die Kürzeste.
 
 \section{Umsetzung}
 
