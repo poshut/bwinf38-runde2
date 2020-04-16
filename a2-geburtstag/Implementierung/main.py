@@ -2,8 +2,6 @@ import sys
 import math
 import argparse
 from collections import defaultdict
-from itertools import combinations_with_replacement
-from queue import Queue
 
 MAX_DIGITS = 100
 FACTORIALS = {}
@@ -45,15 +43,21 @@ class Number(Term):
 
     def __init__(self, val):
         self.val = val
+        self.text = None
+        self.num_digits = None
     
     def value(self):
         return self.val
     
     def number_of_digits(self):
-        return len(str(self.val))
+        if self.num_digits is None:
+            self.num_digits = len(self.__str__())
+        return self.num_digits
     
     def __str__(self):
-        return str(self.val)
+        if self.text is None:
+            self.text = str(self.val)
+        return self.text
 
 class UnaryOperation(Term):
     """
@@ -66,17 +70,27 @@ class UnaryOperation(Term):
         assert op in self.__class__.OPERATIONS
         self.val = val
         self.op = op
-    
+        self.num_digits = None
+        self.v = None
+        self.text = None
+
+
     def value(self):
         if self.op == UnaryOperation.OP_FAC:
-            return math.factorial(self.val.value())
+            if self.v is None:
+                self.v = math.factorial(self.val.value())
+            return self.v
         return NotImplementedError()
     
     def number_of_digits(self):
-        return self.val.number_of_digits()
+        if self.num_digits is None:
+            self.num_digits = self.val.number_of_digits()
+        return self.num_digits
     
     def __str__(self):
-        return '({}!)'.format(self.val)
+        if self.text is None:
+            self.text = '({}!)'.format(self.val)
+        return self.text
 
 
 class BinaryOperation(Term):
@@ -96,44 +110,54 @@ class BinaryOperation(Term):
         self.val1 = val1
         self.val2 = val2
         self.op = op
+        self.v = None
+        self.num_digits = None
+        self.oc = None
+        self.text = None
 
     def value(self):
-        if self.op == BinaryOperation.OP_ADD:
-            return self.val1.value() + self.val2.value()
-        elif self.op == BinaryOperation.OP_SUB:
-            return self.val1.value() - self.val2.value()
-        elif self.op == BinaryOperation.OP_MULT:
-            return self.val1.value() * self.val2.value()
-        elif self.op == BinaryOperation.OP_DIV:
-            v1 = self.val1.value()
-            v2 = self.val2.value()
-            res = v1/v2
-            resint = int(res)
-            assert res == resint
-            return resint
-        elif self.op == BinaryOperation.OP_POW:
-            return self.val1.value() ** self.val2.value()
-        return NotImplementedError()
+        if self.v is None:
+            if self.op == BinaryOperation.OP_ADD:
+                self.v = self.val1.value() + self.val2.value()
+            elif self.op == BinaryOperation.OP_SUB:
+                self.v =  self.val1.value() - self.val2.value()
+            elif self.op == BinaryOperation.OP_MULT:
+                self.v =  self.val1.value() * self.val2.value()
+            elif self.op == BinaryOperation.OP_DIV:
+                v1 = self.val1.value()
+                v2 = self.val2.value()
+                res = v1/v2
+                resint = int(res)
+                if res == resint:
+                    self.v = resint
+            elif self.op == BinaryOperation.OP_POW:
+                self.v = self.val1.value() ** self.val2.value()
+        return self.v
 
     def number_of_digits(self):
-        return self.val1.number_of_digits() + self.val2.number_of_digits()
+        if self.num_digits is None:
+            self.num_digits = self.val1.number_of_digits() + self.val2.number_of_digits()
+        return self.num_digits
     
     def __str__(self):
-        return '({}{}{})'.format(str(self.val1), self.opchar(), str(self.val2))
+        if self.text is None:
+            self.text = '({}{}{})'.format(str(self.val1), self.opchar(), str(self.val2))
+        return self.text
     
     def opchar(self):
-        if self.op == BinaryOperation.OP_ADD:
-            return '+'
-        elif self.op == BinaryOperation.OP_SUB:
-            return '-'
-        elif self.op == BinaryOperation.OP_MULT:
-            return '*'
-        elif self.op == BinaryOperation.OP_DIV:
-            return '/'
-        elif self.op == BinaryOperation.OP_POW:
-            return '^'
-        return NotImplementedError()
-        
+        if self.oc is None:
+            if self.op == BinaryOperation.OP_ADD:
+                self.oc = '+'
+            elif self.op == BinaryOperation.OP_SUB:
+                self.oc = '-'
+            elif self.op == BinaryOperation.OP_MULT:
+                self.oc = '*'
+            elif self.op == BinaryOperation.OP_DIV:
+                self.oc = '/'
+            elif self.op == BinaryOperation.OP_POW:
+                self.oc = '^'
+        return self.oc
+
 
 def add_to_table(term, table, extended=False):
     """
@@ -173,22 +197,32 @@ def generate(digit, num_digits, aggregated_table, split_table, extended, debug=F
                     op1_v, op2_v = op2_v, op1_v
                     swap = True
 
-
                 add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_ADD), current_split_table, extended)
                 add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_SUB), current_split_table, extended)
                 add_to_table(BinaryOperation(op2_v, op1_v, BinaryOperation.OP_SUB), current_split_table, extended)
                 add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_MULT), current_split_table, extended)
                 if extended and op1_k >= 2 and op2_k >= 2:
-                    if math.floor(op2_k * math.log(op1_k, 10)) + 1 <= MAX_DIGITS:
-                        add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_POW), current_split_table, extended)
-                    if math.floor(op1_k * math.log(op2_k, 10)) + 1 <= MAX_DIGITS:
-                        add_to_table(BinaryOperation(op2_v, op1_v, BinaryOperation.OP_POW), current_split_table, extended)
+
+                    try:
+                        if math.floor(op2_k * math.log(op1_k, 10)) + 1 <= MAX_DIGITS:
+                            add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_POW), current_split_table, extended)
+                    except OverflowError:
+                        print("overflow at power", op1_k, op2_k, file=sys.stderr)
+
+                    try:
+                        if math.floor(op1_k * math.log(op2_k, 10)) + 1 <= MAX_DIGITS:
+                            add_to_table(BinaryOperation(op2_v, op1_v, BinaryOperation.OP_POW), current_split_table, extended)
+                    except OverflowError:
+                        print("overflow at power", op1_k, op2_k, file=sys.stderr)
 
                 if op2_k != 0:
-                    res = op1_k / op2_k
-                    resint = int(res)
-                    if res == resint:
-                        add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_DIV), current_split_table, extended)
+                    try:
+                        res = op1_k / op2_k
+                        resint = int(res)
+                        if res == resint:
+                            add_to_table(BinaryOperation(op1_v, op2_v, BinaryOperation.OP_DIV), current_split_table, extended)
+                    except OverflowError:
+                        print("overflow at division", op1_k, op2_k, file=sys.stderr)
 
                 if swap:
                     op1_k, op2_k = op2_k, op1_k

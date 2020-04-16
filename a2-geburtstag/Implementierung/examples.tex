@@ -6,9 +6,9 @@ $ command time -f 'Zeit: %E' python main.py 2019 1
 normal result ((((11111-1)/11)*(1+1))-1)
 digits: 11
 
-extended result ((((1+1)+1)*(1-11))+(((1+1)^11)+1))
+extended result ((1+(((1+1)+1)*(1-11)))+((1+1)^11))
 digits: 11
-Zeit: 0:05.14
+Zeit: 0:02.41
 \end{lstlisting}
 \subsubsection{2030}
 \begin{lstlisting}
@@ -16,9 +16,9 @@ $ command time -f 'Zeit: %E' python main.py 2030 1
 normal result ((1-11)*(((1+1)*((11-1)-111))-1))
 digits: 12
 
-extended result ((((1+1)^11)-((((1+1)+1)!)+1))-11)
+extended result ((((1+1)^11)-(((1+1)+1)!))-(11+1))
 digits: 10
-Zeit: 0:01.69
+Zeit: 0:00.67
 \end{lstlisting}
 \subsubsection{2080}
 \begin{lstlisting}
@@ -26,19 +26,19 @@ $ command time -f 'Zeit: %E' python main.py 2080 1
 normal result ((1-11)*((11+1)+((1+1)*(1-111))))
 digits: 12
 
-extended result (((1+1)^11)+((1+1)^((((1+1)+1)!)-1)))
+extended result (((1+1)^((((1+1)+1)!)-1))+((1+1)^11))
 digits: 10
-Zeit: 0:01.42
+Zeit: 0:00.71
 \end{lstlisting}
 \subsubsection{2980}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2980 1
-normal result ((1-11)*((1+1)+(((1+1)+1)*(11-111))))
+normal result (((1+1)+(((1+1)+1)*(11-111)))*(1-11))
 digits: 13
 
-extended result ((((((1+1)+1)!)+1)!)-(((1+1)^11)+(11+1)))
+extended result (((((((1+1)+1)!)+1)!)-((1+1)^11))-(11+1))
 digits: 11
-Zeit: 0:05.88
+Zeit: 0:02.90
 \end{lstlisting}
 \subsection{Ziffer 2}
 \subsubsection{2019}
@@ -48,39 +48,39 @@ $ command time -f 'Zeit: %E' python main.py 2019 2
 normal result ((((((22*2)+2)*22)-2)*2)-(2/2))
 digits: 10
 
-extended result (((((2^2)*2)!)/(22-2))+(2+(2/2)))
+extended result ((2-((((2^2)*2)!)/(2-22)))+(2/2))
 digits: 9
-Zeit: 0:02.46
+Zeit: 0:01.42
 \end{lstlisting}
 \subsubsection{2030}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2030 2
-normal result (2+(((((22*2)+2)*22)+2)*2))
+normal result ((((((22*2)+2)*22)+2)*2)+2)
 digits: 9
 
-extended result ((2^2)-(22-(2^(22/2))))
+extended result (((2^(22/2))+2)-(22-2))
 digits: 8
-Zeit: 0:00.53
+Zeit: 0:00.31
 \end{lstlisting}
 \subsubsection{2080}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2080 2
-normal result ((2*2)*((22+(2*2))*(22-2)))
+normal result (((22+(2*2))*(2*2))*(22-2))
 digits: 9
 
-extended result ((((((2^2)!)*2)^2)-2)-222)
+extended result ((((2^2)!)+2)*((22-2)*(2^2)))
 digits: 8
-Zeit: 0:00.38
+Zeit: 0:00.23
 \end{lstlisting}
 \subsubsection{2980}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2980 2
-normal result (2*(2-((22+2)*((2*(2-22))-22))))
+normal result ((2-((22+2)*((2*(2-22))-22)))*2)
 digits: 11
 
-extended result (((((2^2)!)*2)^2)+((((2^2)!)+2)^2))
+extended result (((2^(2^(2^2)))+((2^2)!))/22)
 digits: 8
-Zeit: 0:03.07
+Zeit: 0:01.36
 \end{lstlisting}
 \subsection{Ziffer 3}
 \subsubsection{2019}
@@ -102,7 +102,7 @@ digits: 9
 
 extended result (((((3!)!)-3)*3)-((((3!)!)+(3!))/(3!)))
 digits: 6
-Zeit: 0:00.21
+Zeit: 0:00.13
 \end{lstlisting}
 \subsubsection{2080}
 \begin{lstlisting}
@@ -112,17 +112,17 @@ digits: 9
 
 extended result ((((3!)!)*3)-((((3!)!)/3)/3))
 digits: 5
-Zeit: 0:00.12
+Zeit: 0:00.08
 \end{lstlisting}
 \subsubsection{2980}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2980 3
-normal result ((3/3)-(3*((3+3)-(333*3))))
+normal result ((3/3)+(((333*3)-(3+3))*3))
 digits: 9
 
-extended result ((3/3)+(((((3!)!)+33)*3)+((3!)!)))
+extended result ((((3!)!)*3)+(((3!)!)+((((3!)!)-(((3!)!)/(3!)))/(3!))))
 digits: 7
-Zeit: 0:01.53
+Zeit: 0:00.89
 \end{lstlisting}
 \subsection{Ziffer 4}
 \subsubsection{2019}
@@ -132,9 +132,9 @@ $ command time -f 'Zeit: %E' python main.py 2019 4
 normal result ((4-((4+4)*(4-((4*4)*(4*4)))))-(4/4))
 digits: 10
 
-extended result (((((4!)*(4!))*((4!)+4))+(4!))/(4+4))
+extended result ((((4+4)!)/((4!)-4))+(4-(4/4)))
 digits: 7
-Zeit: 0:02.09
+Zeit: 0:01.15
 \end{lstlisting}
 \subsubsection{2030}
 \begin{lstlisting}
@@ -142,9 +142,9 @@ $ command time -f 'Zeit: %E' python main.py 2030 4
 normal result (((444+((4*4)*4))*4)-((4+4)/4))
 digits: 10
 
-extended result (((4!)/4)-((4!)-((4^4)*(4+4))))
+extended result (((4^4)*(4+4))-((4!)-((4!)/4)))
 digits: 7
-Zeit: 0:02.12
+Zeit: 0:01.15
 \end{lstlisting}
 \subsubsection{2080}
 \begin{lstlisting}
@@ -152,41 +152,41 @@ $ command time -f 'Zeit: %E' python main.py 2080 4
 normal result ((((4*4)*(4*4))+4)*(4+4))
 digits: 7
 
-extended result ((4+4)*((4^4)+4))
+extended result (((4^4)+4)*(4+4))
 digits: 5
-Zeit: 0:00.05
+Zeit: 0:00.04
 \end{lstlisting}
 \subsubsection{2980}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2980 4
-normal result ((((((4*4)*4)+4)*44)+4)-(4*4))
+normal result ((((((4*4)*4)+4)*44)-4)-(4+4))
 digits: 9
 
 extended result ((((((4!)/4)!)+(4!))*4)+4)
 digits: 5
-Zeit: 0:00.24
+Zeit: 0:00.15
 \end{lstlisting}
 \subsection{Ziffer 5}
 \subsubsection{2019}
 Der von meinem Programm gefundene Term hat genauso viele Ziffern wie das Beispiel aus der Aufgabenstellung:
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2019 5
-normal result (((((55+(5*5))*5)+5)*5)-(5+(5/5)))
+normal result ((((((55+(5*5))*5)+5)*5)-5)-(5/5))
 digits: 10
 
-extended result (((5!)/5)+((((5!)+5)*((5+5)+5))+(5!)))
+extended result ((5-(5555/5))+(5^5))
 digits: 8
-Zeit: 0:05.29
+Zeit: 0:02.85
 \end{lstlisting}
 \subsubsection{2030}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2030 5
-normal result (5+((((55+(5*5))*5)+5)*5))
+normal result (((((55+(5*5))*5)+5)*5)+5)
 digits: 8
 
-extended result (((5!)+(5*5))*(((5!)/5)-(5+5)))
+extended result (((5!)*(((5!)/(5+5))+5))-(5+5))
 digits: 7
-Zeit: 0:00.52
+Zeit: 0:00.28
 \end{lstlisting}
 \subsubsection{2080}
 \begin{lstlisting}
@@ -196,17 +196,17 @@ digits: 8
 
 extended result ((5^5)-(55*(((5!)/5)-5)))
 digits: 7
-Zeit: 0:00.49
+Zeit: 0:00.23
 \end{lstlisting}
 \subsubsection{2980}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2980 5
-normal result ((55*55)-(55-(5+5)))
+normal result (((55*55)+(5+5))-55)
 digits: 8
 
 extended result (((5^5)-(5!))-(5*5))
 digits: 5
-Zeit: 0:00.09
+Zeit: 0:00.05
 \end{lstlisting}
 \subsection{Ziffer 6}
 \subsubsection{2019}
@@ -216,9 +216,9 @@ $ command time -f 'Zeit: %E' python main.py 2019 6
 normal result (((((666+6)*6)+6)*6)/(6+6))
 digits: 9
 
-extended result (((6!)+(6!))-(((((6!)+6)+((6!)/6))/6)-(6!)))
+extended result (((6!)-((((6!)+6)+((6!)/6))/6))+((6!)+(6!)))
 digits: 8
-Zeit: 0:03.20
+Zeit: 0:01.92
 \end{lstlisting}
 \subsubsection{2030}
 \begin{lstlisting}
@@ -226,29 +226,29 @@ $ command time -f 'Zeit: %E' python main.py 2030 6
 normal result (((66*6)+((66-6)/6))*(6-(6/6)))
 digits: 10
 
-extended result ((((6^6)+(6!))/(6*6))-(6-(6!)))
+extended result (((6!)-6)+(((6^6)+(6!))/(6*6)))
 digits: 7
-Zeit: 0:00.75
+Zeit: 0:00.40
 \end{lstlisting}
 \subsubsection{2080}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2080 6
-normal result (((6-(6*6))-((6+6)/6))*((6/6)-66))
+normal result ((66-(6/6))*(((6+6)/6)-(6-(6*6))))
 digits: 10
 
-extended result (((6!)+(6!))+((6!)-(((6!)+(6!))/((6+6)+6))))
+extended result (((6!)+(6!))-((((6!)+(6!))/((6+6)+6))-(6!)))
 digits: 8
-Zeit: 0:03.53
+Zeit: 0:02.11
 \end{lstlisting}
 \subsubsection{2980}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2980 6
-normal result (((((6*6)*(6+6))-6)*(6+(6/6)))-((6+6)/6))
+normal result (((((6*6)*(6+6))+66)*6)-(6+((6+6)/6)))
 digits: 11
 
-extended result (((((6!)-((6!)/6))/6)-((6!)+(6!)))+((6!)*6))
+extended result ((((6!)*6)-(6!))-((6!)-(((6!)-((6!)/6))/6)))
 digits: 8
-Zeit: 0:05.08
+Zeit: 0:02.76
 \end{lstlisting}
 \subsection{Ziffer 7}
 \subsubsection{2019}
@@ -258,9 +258,9 @@ $ command time -f 'Zeit: %E' python main.py 2019 7
 normal result (((77-7)/7)-(7*(7+(7*(7-(7*7))))))
 digits: 10
 
-extended result (((((7!)+7)*(7+7))+7)/((7*7)-(7+7)))
+extended result (((((7!)+(7!))*((7!)+7))+(7!))/(((7!)*7)-((7!)+(7!))))
 digits: 9
-Zeit: 0:32.72
+Zeit: 0:22.14
 \end{lstlisting}
 \subsubsection{2030}
 \begin{lstlisting}
@@ -268,9 +268,9 @@ $ command time -f 'Zeit: %E' python main.py 2030 7
 normal result (((7-(7*(7-(7*7))))*7)-77)
 digits: 8
 
-extended result ((((7!)/(7+7))+(7-77))*7)
+extended result (7*(((7!)/(7+7))+(7-77)))
 digits: 7
-Zeit: 0:02.59
+Zeit: 0:01.52
 \end{lstlisting}
 \subsubsection{2080}
 \begin{lstlisting}
@@ -278,19 +278,19 @@ $ command time -f 'Zeit: %E' python main.py 2080 7
 normal result ((7-(77*(7-((7+7)*(7+7)))))/7)
 digits: 9
 
-extended result ((((((7*7)+7)*7)+7)*7)-(((7!)/7)-7))
+extended result ((((7*7)+7)*((7*7)+(7/7)))-((7!)/7))
 digits: 9
-Zeit: 0:31.40
+Zeit: 0:19.83
 \end{lstlisting}
 \subsubsection{2980}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2980 7
-normal result ((((7/7)-7)*((7*(7-77))-7))-((7+7)/7))
+normal result ((7-((7+7)/7))*(((77+7)*7)+(7+(7/7))))
 digits: 11
 
-extended result (((7!)+((7*7)*(7-(7*7))))-((7+7)/7))
+extended result (((7+7)/7)*(777-(7-((7!)/7))))
 digits: 9
-Zeit: 0:36.93
+Zeit: 0:21.80
 \end{lstlisting}
 \subsection{Ziffer 8}
 \subsubsection{2019}
@@ -302,37 +302,37 @@ digits: 11
 
 extended result ((((8!)/(8+8))-((8*8)*8))+(88/8))
 digits: 9
-Zeit: 0:35.46
+Zeit: 0:20.32
 \end{lstlisting}
 \subsubsection{2030}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2030 8
-normal result (((8+8)/8)*(((8*8)*(8+8))-(8+(8/8))))
+normal result (((((8+8)*8)*(8+8))-((8+8)/8))-(8+8))
 digits: 10
 
-extended result ((88*(8+8))-(8-(((8!)/8)/8)))
+extended result ((((8!)/8)/8)-(8-(88*(8+8))))
 digits: 8
-Zeit: 0:03.04
+Zeit: 0:01.67
 \end{lstlisting}
 \subsubsection{2080}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2080 8
-normal result ((((8+8)*8)+((8+8)/8))*(8+8))
+normal result ((8+8)*(((8+8)*8)+((8+8)/8)))
 digits: 8
 
-extended result (((8!)/(((88+8)/8)+8))+(8*8))
+extended result (((((8!)*8)*8)+(8!))/(((8!)+(8!))/(8*8)))
 digits: 8
-Zeit: 0:02.73
+Zeit: 0:01.53
 \end{lstlisting}
 \subsubsection{2980}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2980 8
-normal result (((((8*8)*8)*((8*8)*8))+(88+8))/88)
+normal result (((((88+8)*(8*8))-8)/((8+8)/8))-88)
 digits: 11
 
-extended result ((((8!)+(888*8))/(8+8))+(8+8))
+extended result ((8/8)+((((8^8)/(8*8))+8)/88))
 digits: 9
-Zeit: 0:36.19
+Zeit: 0:20.11
 \end{lstlisting}
 \subsection{Ziffer 9}
 \subsubsection{2019}
@@ -344,7 +344,7 @@ digits: 10
 
 extended result (99+((9!)/((99+9)+(9*9))))
 digits: 8
-Zeit: 0:04.59
+Zeit: 0:02.24
 \end{lstlisting}
 \subsubsection{2030}
 \begin{lstlisting}
@@ -354,25 +354,25 @@ digits: 10
 
 extended result ((((9+9)/9)^(99/9))-(9+9))
 digits: 8
-Zeit: 0:03.10
+Zeit: 0:01.42
 \end{lstlisting}
 \subsubsection{2080}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2080 9
-normal result ((9/9)+(99*(((99+9)/9)+9)))
+normal result ((9*9)+(((999*(9+9))+9)/9))
 digits: 9
 
 extended result (((9*9)*(9*9))-((((9!)/9)+9)/9))
 digits: 8
-Zeit: 0:02.22
+Zeit: 0:01.25
 \end{lstlisting}
 \subsubsection{2980}
 \begin{lstlisting}
 $ command time -f 'Zeit: %E' python main.py 2980 9
-normal result (((((9+9)*9)+9)*(9+9))-(99-(9/9)))
+normal result (((((9+9)*(9+9))+9)*9)-((9+9)-(9/9)))
 digits: 10
 
 extended result (((9*9)*9)+((((9!)/(9+9))+99)/9))
 digits: 9
-Zeit: 0:25.42
+Zeit: 0:14.58
 \end{lstlisting}
